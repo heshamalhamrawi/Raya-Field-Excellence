@@ -1836,13 +1836,19 @@ function initResponsive() {
   const isMobile = window.innerWidth <= 768;
 
   if (isMobile) {
-    // Mobile: hide sidebar, use Tab 0
+    // Mobile: hide sidebar, activate Tab 0
     if (toggle) toggle.style.display = 'none';
     const sb = document.getElementById('sidebar-main');
     if (sb) sb.style.display = 'none';
     if (!window._mobileInitDone) {
       window._mobileInitDone = true;
-      switchDay(0);
+      // Activate tab 0 visually without rebuilding (already built in DOMContentLoaded)
+      [0,1,2,3,4].forEach(n => {
+        const p = document.getElementById('dp'+n);
+        const t = document.getElementById('dtab'+n);
+        if (p) p.classList.toggle('active', n===0);
+        if (t) t.classList.toggle('active', n===0);
+      });
     }
   } else {
     // Desktop: show sidebar + Tab 0 visible in tabs
@@ -1873,14 +1879,15 @@ function toggleSidebar() {
 window.addEventListener('resize', initResponsive);
 
 document.addEventListener('DOMContentLoaded', () => {
-  initResponsive();
-
   document.getElementById('inp-date').value = new Date().toISOString().split('T')[0];
   populateBranches();
   buildJourneyBar();
   buildSections('sections-d1', SECTIONS_D1);
   buildSidebarBars();
   updateScore();
+  // Build dp0 AFTER all data is ready, then handle responsive
+  buildDp0VisitData();
+  initResponsive();
 });
 
 // ── Build dp0 Visit Data panel (mirrors sidebar, for mobile) ──
@@ -2412,21 +2419,26 @@ function rateIt(btn, key, val) {
 
 // ==================== DAY SWITCH ====================
 function switchDay(d) {
-  [1,2,3,4].forEach(n => {
+  [0,1,2,3,4].forEach(n => {
     const p = document.getElementById('dp'+n);
     const t = document.getElementById('dtab'+n);
     if (p) p.classList.toggle('active', d===n);
     if (t) t.classList.toggle('active', d===n);
   });
-  // Scroll content area to top on tab switch
   const contentEl = document.querySelector('.content');
   if (contentEl) contentEl.scrollTop = 0;
-  // Dashboard panel: full height, no sidebar
-  const sidebar = document.getElementById('sidebar-main');
-  if (sidebar) sidebar.style.display = d===4 ? 'none' : '';
-  if (d === 2) buildDay2Dynamic();
-  if (d === 3) buildActionPlan();
-  const mainEl=document.querySelector('.main');if(mainEl)mainEl.classList.toggle('dash-mode',d===4);const sb=document.getElementById('sidebar-main');if(sb)sb.style.display=d===4?'none':'';if(d===2)buildDay2Dynamic();if(d===3)buildActionPlan();if(d===4){loadDashData();}
+  const mainEl = document.querySelector('.main');
+  if (mainEl) mainEl.classList.toggle('dash-mode', d===4);
+  const sb = document.getElementById('sidebar-main');
+  if (sb) {
+    if (d===4) sb.style.display = 'none';
+    else if (window.innerWidth > 768) sb.style.display = '';
+    // On mobile sidebar stays hidden — dp0 handles it
+  }
+  if (d===0) buildDp0VisitData();
+  if (d===2) buildDay2Dynamic();
+  if (d===3) buildActionPlan();
+  if (d===4) loadDashData();
 }
 
 // ══════════════════════════════════════════════════════

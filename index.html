@@ -1253,6 +1253,16 @@ input[type=checkbox] { accent-color: var(--green); cursor: pointer; }
   content: ''; position: absolute; top: 100%; right: 50%; transform: translateX(50%);
   border: 6px solid transparent; border-top-color: #0D1B3E;
 }
+
+/* ── Visit Data Tab (dp0) — shown on all screens ── */
+#dtab0 { display: flex !important; order: -1; }
+@media (max-width: 768px) {
+  #sidebar-main { display: none !important; }
+  #dp0 { padding: 16px 14px; }
+}
+@media (min-width: 769px) {
+  #dp0 { padding: 20px 24px; max-width: 700px; margin: 0 auto; overflow-y: auto; height: 100%; }
+}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </head>
@@ -1271,6 +1281,7 @@ input[type=checkbox] { accent-color: var(--green); cursor: pointer; }
     <div class="header-meta">Hesham Alghamrawi</div>
   </div>
   <div class="day-tabs-header">
+    <div class="day-tab-h" onclick="switchDay(0)" id="dtab0" style="display:none">📋 بيانات الزيارة</div>
     <div class="day-tab-h active" onclick="switchDay(1)" id="dtab1">📋 يوم 1</div>
     <div class="day-tab-h" onclick="switchDay(2)" id="dtab2">🚀 يوم 2</div>
     <div class="day-tab-h" onclick="switchDay(3)" id="dtab3">📌 خطة العمل</div>
@@ -1355,6 +1366,9 @@ input[type=checkbox] { accent-color: var(--green); cursor: pointer; }
   <!-- CONTENT -->
   <div class="content">
     <!-- DAY 1 -->
+    <div class="day-panel" id="dp0" style="overflow-y:auto;height:100%;padding:16px">
+      <div id="dp0-visit-data"></div>
+    </div>
     <div class="day-panel active" id="dp1">
 
 
@@ -1818,16 +1832,24 @@ function toggleSidebar() {
 function initResponsive() {
   const toggle = document.getElementById('sidebar-toggle-btn');
   const collapsible = document.getElementById('sidebar-collapsible');
-  if (window.innerWidth <= 768) {
-    toggle.style.display = 'flex';
-    collapsible.classList.add('collapsed');
-    collapsible.style.maxHeight = collapsible.scrollHeight + 'px';
-    // When collapsed, set to 0
-    requestAnimationFrame(() => { collapsible.style.maxHeight = '0'; });
+  const tab0 = document.getElementById('dtab0');
+  const isMobile = window.innerWidth <= 768;
+
+  if (isMobile) {
+    // Mobile: hide sidebar, use Tab 0
+    if (toggle) toggle.style.display = 'none';
+    const sb = document.getElementById('sidebar-main');
+    if (sb) sb.style.display = 'none';
+    if (!window._mobileInitDone) {
+      window._mobileInitDone = true;
+      switchDay(0);
+    }
   } else {
-    toggle.style.display = 'none';
-    collapsible.classList.remove('collapsed');
-    collapsible.style.maxHeight = 'none';
+    // Desktop: show sidebar + Tab 0 visible in tabs
+    if (toggle) toggle.style.display = 'none';
+    if (collapsible) { collapsible.classList.remove('collapsed'); collapsible.style.maxHeight = 'none'; }
+    const sb = document.getElementById('sidebar-main');
+    if (sb) sb.style.display = '';
   }
 }
 
@@ -1860,6 +1882,196 @@ document.addEventListener('DOMContentLoaded', () => {
   buildSidebarBars();
   updateScore();
 });
+
+// ── Build dp0 Visit Data panel (mirrors sidebar, for mobile) ──
+function buildDp0VisitData() {
+  const el = document.getElementById('dp0-visit-data');
+  if (!el) return;
+
+  // Read current sidebar values
+  const bname  = document.getElementById('branch-search')?.value || '';
+  const bsel   = document.getElementById('sel-branch')?.value || '';
+  const date   = document.getElementById('inp-date')?.value || '';
+  const mgr    = document.getElementById('inp-mgr')?.value || '';
+  const area   = document.getElementById('inp-area')?.value || '';
+  const region = document.getElementById('inp-region')?.value || '';
+  const hrid   = document.getElementById('inp-hrid')?.value || '';
+  const insp   = document.getElementById('inp-inspector')?.value || '';
+  const note   = document.getElementById('inp-general-note')?.value || '';
+
+  // Build score summary
+  const d1 = _getD1Data();
+  const scoreColor = d1.total===null?'var(--text-muted)':d1.total>=80?'var(--green)':d1.total>=65?'var(--blue)':d1.total>=45?'var(--amber)':'var(--red)';
+
+  el.innerHTML = `
+    <div style="font-size:14px;font-weight:800;color:var(--navy);margin-bottom:16px;padding-bottom:10px;border-bottom:2px solid var(--accent-dim)">📋 بيانات الزيارة</div>
+
+    <!-- Score card (if available) -->
+    ${d1.total !== null ? `<div style="background:var(--navy);border-radius:var(--radius);padding:14px 16px;margin-bottom:16px;color:#fff;display:flex;align-items:center;gap:14px">
+      <div style="text-align:center">
+        <div style="font-size:32px;font-weight:800;color:${scoreColor};font-family:var(--mono)">${d1.total}%</div>
+        <div style="font-size:10px;color:rgba(255,255,255,.6);margin-top:2px">${d1.grade}</div>
+      </div>
+      <div style="flex:1;font-size:11px;color:rgba(255,255,255,.7);line-height:1.7">
+        ${d1.weakSecs.length?`❌ ${d1.weakSecs.length} قسم ضعيف<br/>${d1.weakSecs.slice(0,2).map(s=>s.emoji+' '+s.title).join(' · ')}`:'✅ أداء جيد'}
+      </div>
+    </div>` : ''}
+
+    <!-- Branch search -->
+    <div style="margin-bottom:12px">
+      <label style="font-size:11px;font-weight:700;color:var(--text-muted);display:block;margin-bottom:5px">الفرع</label>
+      <div style="position:relative">
+        <input type="text" id="dp0-branch-search" placeholder="🔍 ابحث باسم الفرع..." value="${bname}"
+          oninput="dp0FilterBranches(this.value)"
+          autocomplete="off"
+          style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:14px;font-family:var(--font);outline:none;color:var(--text);background:var(--surface)"
+          onfocus="this.style.borderColor='var(--blue)'" onblur="setTimeout(()=>{const dd=document.getElementById('dp0-branch-dd');if(dd)dd.style.display='none'},200)"/>
+        <div id="dp0-branch-dd" style="display:none;position:absolute;top:100%;right:0;left:0;background:var(--surface);border:1.5px solid var(--blue);border-radius:var(--radius-sm);max-height:200px;overflow-y:auto;z-index:100;box-shadow:var(--shadow-lg)"></div>
+        <div id="dp0-branch-status" style="font-size:10.5px;color:var(--text-muted);margin-top:3px">${bname?'✅ '+bname:''}</div>
+      </div>
+    </div>
+
+    <!-- Date -->
+    <div style="margin-bottom:12px">
+      <label style="font-size:11px;font-weight:700;color:var(--text-muted);display:block;margin-bottom:5px">تاريخ الزيارة</label>
+      <input type="date" id="dp0-date" value="${date}" oninput="syncField('inp-date',this.value)"
+        style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:14px;font-family:var(--font);outline:none;background:var(--surface);color:var(--text)"
+        onfocus="this.style.borderColor='var(--blue)'" onblur="this.style.borderColor='var(--border)'"/>
+    </div>
+
+    <!-- HRID + Inspector -->
+    <div style="margin-bottom:12px">
+      <label style="font-size:11px;font-weight:700;color:var(--text-muted);display:block;margin-bottom:5px">HRID المُقيِّم</label>
+      <div style="display:flex;gap:8px">
+        <input type="text" id="dp0-hrid" value="${hrid}" placeholder="ادخل HRID..."
+          oninput="dp0LookupEmployee(this.value)"
+          style="width:110px;padding:10px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:14px;font-family:var(--font);outline:none;background:var(--surface);color:var(--text)"
+          onfocus="this.style.borderColor='var(--blue)'" onblur="this.style.borderColor='var(--border)'"/>
+        <input type="text" id="dp0-inspector" value="${insp}" placeholder="اسم المُقيِّم"
+          oninput="syncField('inp-inspector',this.value)"
+          style="flex:1;padding:10px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:14px;font-family:var(--font);outline:none;background:var(--surface);color:var(--text)"
+          onfocus="this.style.borderColor='var(--blue)'" onblur="this.style.borderColor='var(--border)'"/>
+      </div>
+      <div id="dp0-emp-status" style="font-size:10.5px;margin-top:3px;color:var(--text-muted)"></div>
+    </div>
+
+    <!-- Mgr + Area (editable) -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
+      <div>
+        <label style="font-size:11px;font-weight:700;color:var(--text-muted);display:block;margin-bottom:5px">مدير الفرع</label>
+        <input type="text" id="dp0-mgr" value="${mgr}" placeholder="مدير الفرع" oninput="syncField('inp-mgr',this.value)"
+          style="width:100%;padding:9px 11px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:13px;font-family:var(--font);outline:none;background:var(--surface);color:var(--text)"
+          onfocus="this.style.borderColor='var(--blue)'" onblur="this.style.borderColor='var(--border)'"/>
+      </div>
+      <div>
+        <label style="font-size:11px;font-weight:700;color:var(--text-muted);display:block;margin-bottom:5px">مدير المنطقة</label>
+        <input type="text" id="dp0-area" value="${area}" placeholder="مدير المنطقة" oninput="syncField('inp-area',this.value)"
+          style="width:100%;padding:9px 11px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:13px;font-family:var(--font);outline:none;background:var(--surface);color:var(--text)"
+          onfocus="this.style.borderColor='var(--blue)'" onblur="this.style.borderColor='var(--border)'"/>
+      </div>
+    </div>
+
+    <div style="margin-bottom:12px">
+      <label style="font-size:11px;font-weight:700;color:var(--text-muted);display:block;margin-bottom:5px">المنطقة</label>
+      <input type="text" id="dp0-region" value="${region}" placeholder="المنطقة" oninput="syncField('inp-region',this.value)"
+        style="width:100%;padding:9px 11px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:13px;font-family:var(--font);outline:none;background:var(--surface);color:var(--text)"
+        onfocus="this.style.borderColor='var(--blue)'" onblur="this.style.borderColor='var(--border)'"/>
+    </div>
+
+    <div style="margin-bottom:16px">
+      <label style="font-size:11px;font-weight:700;color:var(--text-muted);display:block;margin-bottom:5px">ملاحظة عامة</label>
+      <textarea id="dp0-note" oninput="syncField('inp-general-note',this.value)"
+        placeholder="ملاحظات عامة عن الزيارة..."
+        style="width:100%;padding:9px 11px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:13px;font-family:var(--font);outline:none;background:var(--surface);color:var(--text);resize:none;min-height:60px"
+        onfocus="this.style.borderColor='var(--blue)'" onblur="this.style.borderColor='var(--border)'">${note}</textarea>
+    </div>
+
+    <!-- Dims summary -->
+    ${d1.total !== null ? `<div style="background:var(--accent-dim);border:1.5px solid rgba(0,87,200,.15);border-radius:var(--radius-sm);padding:12px;margin-bottom:16px">
+      <div style="font-size:10px;font-weight:700;color:var(--blue);margin-bottom:8px;letter-spacing:.4px">تشخيص الأبعاد</div>
+      ${['will','know','skill','env','tools'].map(d=>{
+        const v=d1.dimScores[d];
+        const labels={will:'الرغبة',know:'المعرفة',skill:'المهارة',env:'البيئة',tools:'الأدوات'};
+        const c=v===null?'var(--text-muted)':v>=75?'var(--green)':v>=55?'var(--blue)':'var(--red)';
+        return '<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid rgba(0,87,200,.08);font-size:11.5px">'
+          + '<span style="color:var(--text)">'+labels[d]+'</span>'
+          + '<span style="font-weight:700;font-family:var(--mono);color:'+c+'">'+(v!==null?v+'%':'—')+'</span>'
+          + '</div>';
+      }).join('')}
+    </div>` : ''}
+
+    <!-- CTA button -->
+    <button onclick="switchDay(1)" style="width:100%;padding:12px;background:var(--navy);color:#fff;border:none;border-radius:var(--radius-sm);font-size:14px;font-weight:700;font-family:var(--font);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:10px">
+      ابدأ يوم 1 — التشخيص 📋
+    </button>
+    <button onclick="submitVisit()" style="width:100%;padding:11px;background:var(--green);color:#fff;border:none;border-radius:var(--radius-sm);font-size:13px;font-weight:700;font-family:var(--font);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px">
+      ✅ إنهاء الزيارة وتسجيلها
+    </button>
+  `;
+}
+
+// Sync dp0 field to sidebar field
+function syncField(sidebarId, val) {
+  const el = document.getElementById(sidebarId);
+  if (el) el.value = val;
+}
+
+// dp0 branch search
+function dp0FilterBranches(query) {
+  const dd = document.getElementById('dp0-branch-dd');
+  if (!query || query.length < 1) { if(dd) dd.style.display='none'; return; }
+  const q = query.toLowerCase();
+  const matches = BRANCHES.map((b,i)=>({b,i})).filter(({b})=>
+    b.loc.toLowerCase().includes(q)||b.mgr.toLowerCase().includes(q)||b.region.toLowerCase().includes(q)
+  ).slice(0,10);
+  if (!matches.length) { if(dd) { dd.innerHTML='<div style="padding:10px 12px;font-size:12px;color:var(--text-muted)">لا توجد نتائج</div>'; dd.style.display='block'; } return; }
+  if (dd) {
+    dd.innerHTML = matches.map(({b,i})=>`<div onclick="dp0SelectBranch(${i})"
+      style="padding:10px 12px;cursor:pointer;border-bottom:1px solid var(--border);font-size:12.5px"
+      onmouseenter="this.style.background='var(--accent-dim)'" onmouseleave="this.style.background=''">
+      <div style="font-weight:600;color:var(--navy)">${b.loc}</div>
+      <div style="font-size:10.5px;color:var(--text-muted);margin-top:2px">${b.mgr} · ${b.region}</div>
+    </div>`).join('');
+    dd.style.display = 'block';
+  }
+}
+
+function dp0SelectBranch(i) {
+  const b = BRANCHES[i];
+  // Update dp0 fields
+  const search = document.getElementById('dp0-branch-search');
+  const status = document.getElementById('dp0-branch-status');
+  const dd = document.getElementById('dp0-branch-dd');
+  if (search) search.value = b.loc;
+  if (status) status.textContent = '✅ ' + b.mgr + ' · ' + b.region;
+  if (dd) dd.style.display = 'none';
+  // Sync to sidebar
+  document.getElementById('sel-branch').value = i;
+  document.getElementById('branch-search').value = b.loc;
+  document.getElementById('branch-selected').textContent = '✅ '+b.mgr+' · '+b.region;
+  // Fill fields
+  const fillField = (id, val) => { const el=document.getElementById(id); if(el) el.value=val; };
+  fillField('inp-mgr', b.mgr); fillField('dp0-mgr', b.mgr);
+  fillField('inp-area', b.area); fillField('dp0-area', b.area);
+  fillField('inp-region', b.region); fillField('dp0-region', b.region);
+}
+
+function dp0LookupEmployee(hrid) {
+  const trimmed = hrid.trim();
+  const status = document.getElementById('dp0-emp-status');
+  const nameField = document.getElementById('dp0-inspector');
+  // Sync hrid to sidebar
+  const sbHrid = document.getElementById('inp-hrid');
+  if (sbHrid) sbHrid.value = trimmed;
+  if (!trimmed) { if(status) status.textContent=''; return; }
+  if (EMPLOYEES[trimmed]) {
+    if (nameField) nameField.value = EMPLOYEES[trimmed];
+    syncField('inp-inspector', EMPLOYEES[trimmed]);
+    if (status) { status.textContent='✅ '+EMPLOYEES[trimmed]; status.style.color='var(--green)'; }
+  } else {
+    if (status) { status.textContent='⚠️ HRID غير موجود — اكتب الاسم يدوياً'; status.style.color='var(--amber)'; }
+  }
+}
 
 function lookupEmployee(hrid) {
   const trimmed = hrid.trim();

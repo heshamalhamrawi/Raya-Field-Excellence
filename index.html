@@ -1133,6 +1133,126 @@ body {
   .d-modal-body { padding: 12px 14px; }
 }
 
+
+/* ══════════════ UX ENHANCEMENTS ══════════════ */
+
+/* Smooth section body animation */
+.sec-body {
+  display: none;
+  animation: slideDown .2s cubic-bezier(.4,0,.2,1);
+  padding: 0 16px 16px;
+}
+.sec-body.open { display: block; }
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Day panel transitions */
+.day-panel { display: none; animation: fadeIn .2s ease; }
+.day-panel.active { display: block; }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+/* Score number count-up feel */
+.score-number { transition: color .4s ease; }
+
+/* Opt-btn press effect */
+.opt-btn:active { transform: scale(.94); }
+.opt-btn { transition: all .15s cubic-bezier(.4,0,.2,1); }
+
+/* R-btn press */
+.r-btn:active { transform: scale(.9) !important; }
+.r-btn { transition: all .15s cubic-bezier(.4,0,.2,1); }
+
+/* Section header click ripple */
+.sec-header { position: relative; overflow: hidden; }
+
+/* Journey step active pulse */
+.jstep.jactive { box-shadow: inset 0 -2px 0 var(--accent); }
+
+/* Score grade color classes */
+.grade-ex { color: var(--green); }
+.grade-gd { color: var(--blue); }
+.grade-av { color: var(--amber); }
+.grade-pw { color: var(--red); }
+
+/* AP status button */
+.ap-status-btn {
+  padding: 5px 14px; border-radius: 99px; font-size: 11px; font-weight: 700;
+  font-family: var(--font); cursor: pointer; border: 1.5px solid transparent;
+  transition: all .2s cubic-bezier(.4,0,.2,1);
+}
+.ap-status-btn:hover { filter: brightness(1.08); transform: scale(1.03); }
+.ap-status-done { background: var(--green-bg); color: var(--green); border-color: var(--green); }
+.ap-status-pending { background: var(--surface-2); color: var(--text-muted); border-color: var(--border); }
+
+/* Dashboard KPI cards hover */
+.d-kpi { transition: all .2s cubic-bezier(.4,0,.2,1); }
+.d-kpi:hover { transform: translateY(-2px); }
+
+/* Sidebar score card animated */
+.score-card { transition: background .3s; }
+
+/* Table row transitions */
+.d-table tbody tr { transition: background .1s; }
+
+/* Better modal animation */
+.d-modal-overlay { transition: opacity .2s; }
+.d-modal-overlay.open .d-modal { animation: modalUp .25s cubic-bezier(.4,0,.2,1); }
+@keyframes modalUp {
+  from { opacity: 0; transform: translateY(20px) scale(.97); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* Report modal */
+.report-overlay.open .report-modal { animation: modalUp .25s cubic-bezier(.4,0,.2,1); }
+
+/* Textarea focus glow */
+.obs-box:focus, .obs-full:focus {
+  border-color: var(--blue);
+  box-shadow: 0 0 0 3px rgba(0,87,200,.1);
+}
+
+/* Submit button pulse when ready */
+@keyframes pulseGreen {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(10,122,60,.4); }
+  50% { box-shadow: 0 0 0 8px rgba(10,122,60,0); }
+}
+.submit-pulse { animation: pulseGreen 2s infinite; }
+
+/* Journey bar section score colors */
+.jscore-ex { color: #34d399; }
+.jscore-gd { color: #60a5fa; }
+.jscore-av { color: #fbbf24; }
+.jscore-pw { color: #f87171; }
+
+/* Tooltip for section names on mobile */
+.jstep { position: relative; }
+
+/* Dashboard search highlight */
+.d-table tbody td mark { background: #fef08a; border-radius: 2px; padding: 0 2px; }
+
+/* Smooth scroll for content area */
+.content { scroll-behavior: smooth; }
+
+/* Better checkbox in AP */
+input[type=checkbox] { accent-color: var(--green); cursor: pointer; }
+
+
+/* ── AP Indicator tooltip (native title attr enhanced) ── */
+[title] { position: relative; }
+/* Custom rich tooltip for AP cards */
+.ap-tooltip {
+  position: absolute; bottom: calc(100% + 8px); right: 50%; transform: translateX(50%);
+  background: #0D1B3E; color: #fff; font-size: 11px; line-height: 1.5;
+  padding: 8px 12px; border-radius: 6px; white-space: pre-line; max-width: 240px;
+  z-index: 200; box-shadow: 0 4px 16px rgba(0,0,0,.3); pointer-events: none;
+  text-align: center; direction: rtl;
+}
+.ap-tooltip::after {
+  content: ''; position: absolute; top: 100%; right: 50%; transform: translateX(50%);
+  border: 6px solid transparent; border-top-color: #0D1B3E;
+}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </head>
@@ -1248,8 +1368,8 @@ body {
     <div class="day-panel" id="dp2">
       <div id="d2-dynamic-content"></div>
     </div>
-  <div class="day-panel" id="dp3">
-      <div id="ap-container"></div>
+  <div class="day-panel" id="dp3" style="overflow-y:auto;height:100%">
+      <div id="ap-container" style="padding-bottom:40px"></div>
     </div>
   </div>
 
@@ -1277,6 +1397,8 @@ body {
     <div class="d-toolbar-sep"></div>
     <button class="d-btn d-btn-ghost" onclick="dashClear()">✕ مسح</button>
     <span class="d-count-badge" id="df-count">0 زيارة</span>
+    <div class="d-toolbar-sep"></div>
+    <input type="text" id="df-search" placeholder="🔍 بحث في النتائج..." oninput="dashApply()" style="min-width:160px"/>
     <div style="margin-right:auto;display:flex;gap:6px">
       <button class="d-btn d-btn-primary" onclick="dashExportExcel()">⬇ Excel</button>
       <button class="d-btn d-btn-green" onclick="dashExportPDF()">⬇ PDF</button>
@@ -2061,6 +2183,21 @@ function d2Sel(btn, groupId, val) {
   obsData['d2sel_' + groupId] = val;
 }
 
+// ── rateIt: global rating handler for Day2 dynamic buttons ──
+function rateIt(btn, key, val) {
+  if (!btn) return;
+  let p = btn.parentElement;
+  while (p && p.querySelectorAll('.r-btn').length === 0) p = p.parentElement;
+  if (p) p.querySelectorAll('.r-btn').forEach(b => {
+    b.className = b.className.replace(/\bactive-\d\b/g,'').trim();
+  });
+  btn.classList.add('active-' + val);
+  btn.style.transform = 'scale(1.12)';
+  setTimeout(() => { if(btn) btn.style.transform = ''; }, 180);
+  ans[key] = String(val);
+  updateScore();
+}
+
 // ==================== DAY SWITCH ====================
 function switchDay(d) {
   [1,2,3,4].forEach(n => {
@@ -2069,6 +2206,9 @@ function switchDay(d) {
     if (p) p.classList.toggle('active', d===n);
     if (t) t.classList.toggle('active', d===n);
   });
+  // Scroll content area to top on tab switch
+  const contentEl = document.querySelector('.content');
+  if (contentEl) contentEl.scrollTop = 0;
   // Dashboard panel: full height, no sidebar
   const sidebar = document.getElementById('sidebar-main');
   if (sidebar) sidebar.style.display = d===4 ? 'none' : '';
@@ -2089,539 +2229,942 @@ function buildActionPlan() {
   const meta = _getMeta();
 
   if (d1.total === null) {
-    c.innerHTML = `<div style="background:var(--amber-bg);border:1.5px solid var(--amber);border-radius:var(--radius);padding:20px;text-align:center;color:var(--amber)">
-      <div style="font-size:18px;margin-bottom:8px">⚠️</div>
-      <div style="font-weight:700">أكمل يوم التشخيص أولاً</div>
-      <div style="font-size:12px;margin-top:4px;opacity:.8">خطة العمل تتولد تلقائياً بعد إدخال بيانات يوم 1</div>
+    c.innerHTML = `<div style="background:var(--amber-bg);border:1.5px solid var(--amber);border-radius:var(--radius-lg);padding:32px;text-align:center">
+      <div style="font-size:36px;margin-bottom:12px">⚠️</div>
+      <div style="font-size:15px;font-weight:700;color:var(--navy)">أكمل يوم التشخيص أولاً</div>
+      <div style="font-size:12px;color:var(--text-muted);margin-top:6px;line-height:1.6">خطة العمل تتولد تلقائياً من نتائج يوم 1 والملاحظات الميدانية</div>
+      <button onclick="switchDay(1)" style="margin-top:16px;padding:9px 22px;background:var(--navy);color:#fff;border:none;border-radius:var(--radius-sm);font-size:13px;font-weight:700;font-family:var(--font);cursor:pointer">ابدأ يوم 1 ←</button>
     </div>`;
     return;
   }
 
-  // Generate action items from weak sections + day2 notes
+  // ── Build actions from weaknesses ──
   const actions = [];
   let actionId = 0;
 
-  // From Day 1 weaknesses
-  d1.weakSecs.forEach(sec => {
-    const weakQs = sec.questions.filter(q => q.id && ans[q.id] && (ans[q.id]==='no' || ans[q.id]==='nt'));
-    const responsible = sec.dim==='will'?'مدير الفرع + مدير المنطقة':sec.dim==='know'?'المستشار (محتوى تمكين)':sec.dim==='skill'?'مدير الفرع (متابعة يومية)':sec.dim==='env'?'مدير المنطقة':'المستشار';
-    const dueWeeks = sec.pct<45?1:sec.pct<60?2:4;
-    const today = new Date(); const due = new Date(today); due.setDate(today.getDate()+dueWeeks*7);
-    const dueStr = due.toISOString().split('T')[0];
+  const STATUS_LABELS = { pending:'قيد الانتظار', inprogress:'جاري التنفيذ', done:'مكتمل' };
+  const today = () => new Date().toISOString().split('T')[0];
+  const addDays = (n) => { const d=new Date(); d.setDate(d.getDate()+n); return d.toISOString().split('T')[0]; };
 
-    const actionType = sec.dim==='will'?'كوتشينج فردي + جلسة أداء':sec.dim==='know'?'تدريب معرفي + اختبار سريع':sec.dim==='skill'?'Role Play + مران ميداني':sec.dim==='env'?'إجراء تشغيلي + مراجعة ميدانية':'تدريب تقني + دعم IT';
+  // From Day 1 weak questions
+  d1.weakSecs.forEach(sec => {
+    const weakQs = sec.questions.filter(q => q.id && ans[q.id] && (ans[q.id]==='no'||ans[q.id]==='nt'));
+    const partialQs = sec.questions.filter(q => q.id && ans[q.id] && ans[q.id]==='partial');
+
+    const responsible = {will:'مدير الفرع',know:'المستشار',skill:'مدير الفرع',env:'مدير المنطقة',tools:'المستشار'}[sec.dim]||'المستشار';
+    const actionType = {will:'جلسة كوتشينج + خطة أداء فردية',know:'تدريب معرفي + اختبار سريع',skill:'Role Play + مران عملي ميداني',env:'إجراء تشغيلي فوري + مراجعة VM',tools:'تدريب على النظام + دعم IT'}[sec.dim]||'متابعة ميدانية';
+    const dueWeeks = sec.pct<45?1:sec.pct<60?2:3;
 
     weakQs.forEach(q => {
       actionId++;
+      const saved = apItems['ap_'+actionId] || {};
       actions.push({
-        id: 'ap_'+actionId,
-        problem: q.text,
-        section: sec.title,
-        dim: sec.dim,
-        pct: sec.pct,
-        action: actionType,
-        responsible,
-        due: dueStr,
-        priority: sec.pct<45?'urgent':sec.pct<60?'high':'medium'
+        id:'ap_'+actionId, problem:q.text, section:sec.title, emoji:sec.emoji,
+        dim:sec.dim, pct:sec.pct, action:actionType, responsible,
+        due: saved.due||addDays(dueWeeks*7),
+        priority:sec.pct<45?'urgent':sec.pct<60?'high':'medium',
+        status: saved.status||'pending',
+        doneDate: saved.doneDate||'',
+        note: saved.note||''
+      });
+    });
+    partialQs.forEach(q => {
+      actionId++;
+      const saved = apItems['ap_'+actionId] || {};
+      actions.push({
+        id:'ap_'+actionId, problem:q.text, section:sec.title, emoji:sec.emoji,
+        dim:sec.dim, pct:sec.pct, action:actionType+' (تحسين)',
+        responsible, due:saved.due||addDays(4*7),
+        priority:'medium',
+        status:saved.status||'pending',
+        doneDate:saved.doneDate||'',
+        note:saved.note||''
       });
     });
   });
 
-  // From Day 2 notes
-  const d2Still = obsData['d2_still_needed'] || '';
-  const d2Quick = obsData['d2_quickwins'] || '';
-  const d2New = obsData['d2_newneeds'] || '';
+  // From Day 2
+  const d2Still = obsData['d2_still_needed']||'';
+  const d2New   = obsData['d2_newneeds']||'';
+  const d2Wins  = obsData['d2_quickwins']||'';
+  if (d2Still) { actionId++;const sv=apItems['ap_d2_1']||{}; actions.push({id:'ap_d2_1',problem:d2Still,section:'متابعة يوم التطوير',emoji:'🚀',dim:'skill',pct:null,action:'متابعة ما لم يتحسن بعد الكوتشينج',responsible:'المستشار + مدير الفرع',due:sv.due||addDays(14),priority:'high',status:sv.status||'pending',doneDate:sv.doneDate||'',note:sv.note||''}); }
+  if (d2New)   { actionId++;const sv=apItems['ap_d2_2']||{}; actions.push({id:'ap_d2_2',problem:d2New,section:'احتياجات منصة تمكين',emoji:'📚',dim:'know',pct:null,action:'إضافة محتوى تدريبي للمنصة',responsible:'المستشار',due:sv.due||addDays(7),priority:'medium',status:sv.status||'pending',doneDate:sv.doneDate||'',note:sv.note||''}); }
+  if (d2Wins)  { actionId++;const sv=apItems['ap_d2_3']||{}; actions.push({id:'ap_d2_3',problem:d2Wins,section:'Quick Wins',emoji:'⚡',dim:'env',pct:null,action:'تنفيذ فوري خلال أسبوع',responsible:'مدير الفرع',due:sv.due||addDays(7),priority:'urgent',status:sv.status||'pending',doneDate:sv.doneDate||'',note:sv.note||''}); }
 
-  if (d2Still) {
-    actionId++;
-    const due = new Date(); due.setDate(due.getDate()+14);
-    actions.push({
-      id: 'ap_d2_1', problem: d2Still, section: 'متابعة يوم التطوير', dim: 'skill',
-      action: 'متابعة ما لم يتحسن بعد يوم التطوير', responsible: 'المستشار + مدير الفرع',
-      due: due.toISOString().split('T')[0], priority: 'high'
-    });
-  }
-  if (d2New) {
-    actionId++;
-    const due = new Date(); due.setDate(due.getDate()+7);
-    actions.push({
-      id: 'ap_d2_2', problem: 'احتياج تدريبي جديد: ' + d2New, section: 'احتياجات تمكين',
-      dim: 'know', action: 'إضافة محتوى لمنصة تمكين', responsible: 'المستشار',
-      due: due.toISOString().split('T')[0], priority: 'medium'
-    });
-  }
-
-  const priorityColors = {urgent:'var(--red)',high:'var(--amber)',medium:'var(--blue)'};
-  const priorityBg = {urgent:'var(--red-bg)',high:'var(--amber-bg)',medium:'var(--accent-dim)'};
-  const priorityLabel = {urgent:'🔴 عاجل',high:'🟠 مرتفع',medium:'🟡 متوسط'};
-  const dimColors = {will:'var(--amber)',know:'var(--blue)',skill:'var(--green)',env:'var(--red)',tools:'var(--purple)'};
-
-  let html = `
-  <div style="background:var(--navy);border-radius:var(--radius);padding:16px 18px;margin-bottom:16px;color:#fff">
-    <div style="font-size:10px;color:rgba(255,255,255,.6);margin-bottom:6px;letter-spacing:.6px">خطة العمل المتكاملة — Field Action Plan</div>
-    <div style="display:flex;gap:20px;flex-wrap:wrap;align-items:center">
-      <div><span style="font-size:28px;font-weight:800;color:var(--accent)">${actions.length}</span> <span style="font-size:11px;color:rgba(255,255,255,.7)">إجراء مطلوب</span></div>
-      <div><span style="font-size:18px;font-weight:700;color:#f87171">${actions.filter(a=>a.priority==='urgent').length}</span> <span style="font-size:10px;color:rgba(255,255,255,.7)">عاجل</span></div>
-      <div><span style="font-size:18px;font-weight:700;color:#fbbf24">${actions.filter(a=>a.priority==='high').length}</span> <span style="font-size:10px;color:rgba(255,255,255,.7)">مرتفع</span></div>
-      <div style="margin-right:auto"><span style="font-size:18px;font-weight:700;color:#34d399">${Object.values(apItems).filter(a=>a.done).length}</span> <span style="font-size:10px;color:rgba(255,255,255,.7)">مكتمل</span></div>
-      <button onclick="exportActionPlan()" style="padding:7px 14px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.25);border-radius:var(--radius-sm);color:#fff;font-size:12px;font-weight:600;font-family:var(--font);cursor:pointer">⬇️ تصدير Excel</button>
-    </div>
-  </div>`;
-
-  // Table
-  html += `<div style="background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:16px">
-    <div style="overflow-x:auto">
-    <table class="ap-table" style="width:100%;border-collapse:collapse;font-size:12.5px">
-      <thead>
-        <tr style="background:var(--navy);color:#fff">
-          <th style="padding:10px 12px;text-align:right;font-weight:700;white-space:nowrap;font-size:11px">#</th>
-          <th style="padding:10px 12px;text-align:right;font-weight:700;font-size:11px">نقطة التطوير / المشكلة</th>
-          <th style="padding:10px 12px;text-align:right;font-weight:700;white-space:nowrap;font-size:11px">البُعد</th>
-          <th style="padding:10px 12px;text-align:right;font-weight:700;font-size:11px">الإجراء المطلوب</th>
-          <th style="padding:10px 12px;text-align:right;font-weight:700;font-size:11px">المسؤول</th>
-          <th style="padding:10px 12px;text-align:right;font-weight:700;white-space:nowrap;font-size:11px">Due Date</th>
-          <th style="padding:10px 12px;text-align:right;font-weight:700;font-size:11px">الأولوية</th>
-          <th style="padding:10px 12px;text-align:center;font-weight:700;white-space:nowrap;font-size:11px">الحالة</th>
-          <th style="padding:10px 12px;text-align:center;font-weight:700;white-space:nowrap;font-size:11px">تاريخ الإنجاز</th>
-        </tr>
-      </thead>
-      <tbody>`;
-
-  actions.forEach((a, i) => {
-    const saved = apItems[a.id] || {};
-    const isDone = saved.done || false;
-    const doneDate = saved.doneDate || '';
-    html += `<tr style="border-bottom:1px solid var(--border);${isDone?'opacity:.65;text-decoration:line-through;':''}${i%2===1?'background:var(--surface-2)':''}">
-      <td style="padding:9px 12px;font-weight:700;color:var(--text-muted);font-size:11px">${i+1}</td>
-      <td style="padding:9px 12px;min-width:200px">
-        <div style="font-weight:600;color:var(--navy);line-height:1.4;margin-bottom:2px">${a.problem.substring(0,80)}${a.problem.length>80?'…':''}</div>
-        <div style="font-size:10px;color:var(--text-muted)">${a.section}</div>
-      </td>
-      <td style="padding:9px 12px;white-space:nowrap">
-        <span style="display:inline-flex;align-items:center;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;background:${dimColors[a.dim]}20;color:${dimColors[a.dim]}">${dimLabel(a.dim)}</span>
-      </td>
-      <td style="padding:9px 12px;min-width:160px;font-size:12px;color:var(--text)">${a.action}</td>
-      <td style="padding:9px 12px;min-width:130px">
-        <span style="font-size:11.5px;font-weight:600;color:var(--navy)">${a.responsible}</span>
-      </td>
-      <td style="padding:9px 12px;white-space:nowrap">
-        <input type="date" value="${a.due}" onchange="updateApDue('${a.id}',this.value)"
-          style="font-size:11px;border:1px solid var(--border);border-radius:4px;padding:3px 6px;background:var(--surface);color:var(--text);font-family:var(--font);width:120px"/>
-      </td>
-      <td style="padding:9px 12px;white-space:nowrap">
-        <span style="display:inline-flex;align-items:center;padding:3px 9px;border-radius:99px;font-size:10.5px;font-weight:700;background:${priorityBg[a.priority]};color:${priorityColors[a.priority]}">${priorityLabel[a.priority]}</span>
-      </td>
-      <td style="padding:9px 12px;text-align:center">
-        <label style="display:flex;align-items:center;justify-content:center;gap:6px;cursor:pointer">
-          <input type="checkbox" ${isDone?'checked':''} onchange="toggleApDone('${a.id}',this.checked)"
-            style="width:16px;height:16px;cursor:pointer;accent-color:var(--green)"/>
-          <span style="font-size:11px;color:${isDone?'var(--green)':'var(--text-muted)'}">${isDone?'✅ مكتمل':'قيد التنفيذ'}</span>
-        </label>
-      </td>
-      <td style="padding:9px 12px;text-align:center">
-        ${isDone ? `<span style="font-size:11px;color:var(--green);font-weight:600">${doneDate}</span>` :
-          `<input type="date" placeholder="تاريخ الإنجاز" onchange="setApDoneDate('${a.id}',this.value)"
-            style="font-size:11px;border:1px solid var(--border);border-radius:4px;padding:3px 6px;background:var(--surface);color:var(--text);width:120px;font-family:var(--font)"/>`}
-      </td>
-    </tr>`;
+  // Sync to apItems
+  actions.forEach(a => {
+    if (!apItems[a.id]) apItems[a.id] = {};
+    apItems[a.id].due  = apItems[a.id].due||a.due;
+    apItems[a.id].status = apItems[a.id].status||a.status;
+    a.status   = apItems[a.id].status||'pending';
+    a.doneDate = apItems[a.id].doneDate||'';
+    a.due      = apItems[a.id].due||a.due;
+    a.note     = apItems[a.id].note||'';
   });
 
-  html += `</tbody></table></div></div>`;
+  // ── Stats ──
+  const byStatus = s => actions.filter(a=>a.status===s).length;
+  const done=byStatus('done'), inprog=byStatus('inprogress'), pending=byStatus('pending');
+  const pct = actions.length ? Math.round(done/actions.length*100) : 0;
+  const overdue = actions.filter(a=>a.status!=='done'&&a.due&&a.due<today()).length;
 
-  // Progress summary
-  const done = Object.values(apItems).filter(a=>a.done).length;
-  const pct = actions.length ? Math.round((done/actions.length)*100) : 0;
-  html += `<div style="background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius);padding:14px 16px">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-      <span style="font-size:13px;font-weight:700;color:var(--navy)">تقدم تنفيذ خطة العمل</span>
-      <span style="font-size:14px;font-weight:800;color:var(--green)">${pct}%</span>
+  const prColors={urgent:'var(--red)',high:'var(--amber)',medium:'var(--blue)'};
+  const prBg={urgent:'var(--red-bg)',high:'var(--amber-bg)',medium:'var(--accent-dim)'};
+  const prLabel={urgent:'🔴 عاجل',high:'🟠 مرتفع',medium:'🟡 متوسط'};
+  const dimC={will:'var(--amber)',know:'var(--blue)',skill:'var(--green)',env:'var(--red)',tools:'var(--purple)'};
+
+  // ── Header ──
+  let html = `
+  <div style="position:sticky;top:0;z-index:20;background:linear-gradient(135deg,var(--navy) 0%,#002b7a 100%);border-radius:0 0 var(--radius-lg) var(--radius-lg);padding:16px 20px;margin-bottom:14px;color:#fff;box-shadow:0 4px 12px rgba(0,0,0,.2)">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:10px">
+      <div>
+        <div style="font-size:11px;color:rgba(255,255,255,.55);letter-spacing:.7px;margin-bottom:4px">خطة العمل الميدانية — Field Action Plan</div>
+        <div style="font-size:15px;font-weight:700">${meta.bname||'الفرع'} · ${meta.bdate||''}</div>
+      </div>
+      <button onclick="exportActionPlan()" style="padding:8px 16px;background:rgba(255,255,255,.12);border:1.5px solid rgba(255,255,255,.25);border-radius:var(--radius-sm);color:#fff;font-size:12px;font-weight:700;font-family:var(--font);cursor:pointer;transition:background .15s" onmouseover="this.style.background='rgba(255,255,255,.2)'" onmouseout="this.style.background='rgba(255,255,255,.12)'">⬇ تصدير CSV</button>
     </div>
-    <div style="height:8px;background:var(--border);border-radius:99px;overflow:hidden">
-      <div style="height:100%;width:${pct}%;background:var(--green);border-radius:99px;transition:width .5s"></div>
+    <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:12px">
+      ${[
+        {n:actions.length, l:'إجمالي الإجراءات', c:'#fff',      tip:'إجمالي عدد الإجراءات التطويرية المُولَّدة من نقاط الضعف في يوم التشخيص'},
+        {n:pending,  l:'قيد الانتظار', c:'#94a3b8', tip:'إجراءات لم تبدأ بعد — يجب تكليف المسؤول وبدء التنفيذ'},
+        {n:inprog,   l:'جاري التنفيذ', c:'#60a5fa', tip:'إجراءات بدأ تنفيذها وتحتاج متابعة حتى الإنجاز'},
+        {n:done,     l:'مكتمل',        c:'#34d399', tip:'إجراءات مكتملة وتم التحقق منها ميدانياً'},
+        {n:overdue,  l:'متأخر',        c:'#f87171', tip:'إجراءات تجاوزت تاريخ الاستحقاق (Due Date) ولم تُنجز بعد — تحتاج تدخلاً فورياً'},
+      ].map(k=>`<div title="${k.tip}" style="background:rgba(255,255,255,.08);border-radius:8px;padding:10px 12px;text-align:center;cursor:help;transition:background .15s" onmouseenter="this.style.background='rgba(255,255,255,.14)'" onmouseleave="this.style.background='rgba(255,255,255,.08)'">
+        <div style="font-size:22px;font-weight:800;font-family:var(--mono);color:${k.c}">${k.n}</div>
+        <div style="font-size:10px;color:rgba(255,255,255,.6);margin-top:3px">${k.l}</div>
+        <div style="font-size:9px;color:rgba(255,255,255,.35);margin-top:2px;line-height:1.3">${k.tip.substring(0,40)}…</div>
+      </div>`).join('')}
     </div>
-    <div style="display:flex;gap:16px;margin-top:8px;font-size:11px;color:var(--text-muted)">
-      <span>✅ مكتمل: ${done}</span>
-      <span>⏳ متبقي: ${actions.length - done}</span>
-      <span>📋 إجمالي: ${actions.length}</span>
+    <div style="margin-bottom:6px;display:flex;justify-content:space-between;font-size:11px;color:rgba(255,255,255,.65)">
+      <span>تقدم الإنجاز</span><span style="font-weight:700;color:${pct>=70?'#34d399':pct>=40?'#fbbf24':'#f87171'}">${pct}%</span>
+    </div>
+    <div style="height:7px;background:rgba(255,255,255,.15);border-radius:99px;overflow:hidden">
+      <div style="height:100%;width:${pct}%;background:${pct>=70?'#34d399':pct>=40?'#fbbf24':'#f87171'};border-radius:99px;transition:width .6s cubic-bezier(.4,0,.2,1)"></div>
     </div>
   </div>`;
 
+  // ── Kanban-style status filter tabs ──
+  html += `<div style="display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap">
+    ${[['all','الكل',actions.length,'#fff',false],
+       ['pending','قيد الانتظار',pending,'var(--text-muted)',false],
+       ['inprogress','جاري التنفيذ',inprog,'var(--blue)',false],
+       ['done','مكتمل',done,'var(--green)',false],
+       ['urgent-only','عاجل فقط',actions.filter(a=>a.priority==='urgent'&&a.status!=='done').length,'var(--red)',false]
+    ].map(([val,label,count])=>`<button onclick="filterAP('${val}')" id="ap-tab-${val}"
+      style="padding:6px 14px;border-radius:99px;font-size:12px;font-weight:600;font-family:var(--font);cursor:pointer;border:1.5px solid var(--border);background:var(--surface);color:var(--text);transition:all .15s"
+      >${label} <span style="opacity:.7">(${count})</span></button>`).join('')}
+  </div>`;
+
+  // ── Cards ──
+  html += `<div id="ap-cards-container">` + apRenderCards(actions) + `</div>`;
   c.innerHTML = html;
-  // Store actions for export
   c._actions = actions;
+  apSetTabActive('all');
+}
+
+function apRenderCards(actions, filter='all') {
+  const today = new Date().toISOString().split('T')[0];
+
+  // ── Status config ──
+  const statusCfg = {
+    pending:    { cardBg:'var(--surface)',    border:'var(--border)',          btnBg:'var(--surface-2)', btnColor:'var(--text-muted)', btnBorder:'var(--border)',     icon:'⏸', label:'قيد الانتظار' },
+    inprogress: { cardBg:'#f0f7ff',           border:'#93c5fd',               btnBg:'#dbeafe',          btnColor:'#1d4ed8',            btnBorder:'#93c5fd',           icon:'🔄', label:'جاري التنفيذ' },
+    done:       { cardBg:'var(--green-bg)',   border:'rgba(10,122,60,.25)',    btnBg:'var(--green-bg)',  btnColor:'var(--green)',        btnBorder:'rgba(10,122,60,.4)',icon:'✅', label:'مكتمل' },
+  };
+
+  // ── Priority ──
+  const prColors = { urgent:'var(--red)', high:'var(--amber)', medium:'var(--blue)' };
+  const prBg     = { urgent:'var(--red-bg)', high:'var(--amber-bg)', medium:'var(--accent-dim)' };
+  const prLabel  = { urgent:'🔴 عاجل', high:'🟠 مرتفع', medium:'🟡 متوسط' };
+
+  // ── Smart dim detection from question text and dim ──
+  const detectDim = (a, savedCause) => {
+    // If user selected a cause, infer dim from it
+    const causeToIdx = {
+      'غياب التدريب الأساسي':        'skill',
+      'ضعف في المعرفة':              'know',
+      'غياب المتابعة اليومية':       'will',
+      'ضعف في الدافعية':             'will',
+      'بيئة عمل غير مواتية':        'env',
+      'ضغط عمل عالٍ':               'env',
+      'غياب النموذج الصحيح':        'will',
+      'عدم وضوح المعيار':           'env',
+      'مشكلة تقنية':                'tools',
+    };
+    if (savedCause) {
+      for (const [key, dim] of Object.entries(causeToIdx)) {
+        if (savedCause.includes(key)) return dim;
+      }
+    }
+    return a.dim || 'skill';
+  };
+
+  // ── Smart cause suggestions per dim+section ──
+  const getCauseSuggestions = (a) => {
+    const dimCauses = {
+      will:  ['ضعف في الدافعية والرغبة في التطبيق','غياب المتابعة اليومية من المدير','غياب النموذج الصحيح (Role Model)','عدم الشعور بالمسؤولية الشخصية عن الأداء','غياب نظام محاسبة واضح'],
+      know:  ['ضعف في المعرفة بالمنتج أو السياسة','غياب التدريب الأساسي على هذا الموضوع','محتوى منصة تمكين غير محدّث','صعوبة حفظ المعلومات بدون تطبيق عملي','عدم وضوح المعيار والإجراء المطلوب'],
+      skill: ['غياب التدريب العملي والتطبيق الميداني','قلة ممارسة المهارة في بيئة حقيقية أو محاكاة','غياب الملاحظة المباشرة والتغذية الراجعة','التدريب كان نظرياً فقط بدون Role Play','غياب النموذج الصحيح (Role Model) في الفرع'],
+      env:   ['بيئة عمل غير مواتية أو منظمة بشكل خاطئ','ضغط عمل عالٍ وقلة الوقت للتطبيق','عدم وضوح المعيار أو اللوائح التشغيلية','غياب الموارد والأدوات اللازمة','مشكلة في توزيع الأدوار والمسؤوليات'],
+      tools: ['مشكلة تقنية في الأنظمة أو صعوبة الاستخدام','غياب التدريب على الأنظمة والتطبيقات','عدم وضوح خطوات العمل على السيستم','أعطال متكررة تثبط الموظف عن الاستخدام','السيستم غير مُهيّأ بشكل صحيح'],
+    };
+    const sec = a.section || '';
+    const extra = [];
+    if (sec.includes('استقبال') || sec.includes('ترحيب')) extra.push('ضعف الوعي بأثر الانطباع الأول على العميل');
+    if (sec.includes('معرفة') || sec.includes('منتج')) extra.push('كثرة المنتجات الجديدة بدون تدريب مصاحب');
+    if (sec.includes('بيع') || sec.includes('مهارات')) extra.push('خوف من الرفض يمنع الموظف من التطبيق الكامل');
+    if (sec.includes('تقسيط')) extra.push('ضعف الثقة في طرح موضوع التقسيط مع العميل');
+    return [...(dimCauses[a.dim] || dimCauses.skill), ...extra, 'سبب آخر (يُذكر في الملاحظات)'];
+  };
+
+  // ── Smart action suggestions per dim + cause ──
+  const getActionSuggestions = (a, savedCause) => {
+    const dim = detectDim(a, savedCause);
+    const causeActions = {
+      'ضعف في الدافعية':             ['جلسة كوتشينج فردية مع تحديد توقعات واضحة','ربط الأداء بنظام الحوافز الشهري','مراجعة KPIs مع مدير الفرع أسبوعياً'],
+      'غياب المتابعة اليومية':       ['وضع نظام check-in يومي مع مدير الفرع','تحديد وقت محدد يومياً للمراجعة الميدانية','تفعيل نموذج متابعة أسبوعي مكتوب'],
+      'ضعف في المعرفة':              ['جلسة product knowledge مع المورد أو المستشار','إنشاء محتوى مخصص على منصة تمكين','اختبار معرفي سريع أسبوعياً (5 دقائق)'],
+      'غياب التدريب الأساسي':        ['تدريب عملي مكثف (Role Play + تطبيق فوري)','مشاهدة نموذج تطبيق صحيح من مستشار أو مدير','ممارسة يومية مع تغذية راجعة مباشرة'],
+      'بيئة عمل غير مواتية':        ['رفع تقرير تشغيلي لمدير المنطقة مع خطة حل','جلسة مع مدير الفرع لمراجعة الموارد','إعادة تنظيم توزيع الأدوار في الفرع'],
+      'مشكلة تقنية':                ['تدريب عملي على السيستم خطوة بخطوة','التواصل مع فريق IT لحل المشكلة','وضع كارت مرجعي بخطوات الاستخدام'],
+    };
+    // Find best match
+    for (const [key, acts] of Object.entries(causeActions)) {
+      if (savedCause && savedCause.includes(key)) return acts;
+    }
+    // Fallback by dim
+    const dimActions = {
+      will:  ['جلسة كوتشينج فردية مع تحديد أهداف قابلة للقياس','ربط الأداء بنظام الحوافز والمساءلة','متابعة يومية من مدير الفرع لمدة شهر'],
+      know:  ['تدريب معرفي مكثف + اختبار تحقق من الفهم','تحديث محتوى منصة تمكين بمواد مخصصة','جلسة مراجعة أسبوعية بالأسئلة والأجوبة'],
+      skill: ['Role Play أسبوعي لمدة شهر (30 دقيقة)','ملاحظة ميدانية مباشرة مع تغذية راجعة فورية','تطبيق تحت إشراف المستشار ثم مستقل'],
+      env:   ['مراجعة الإجراءات التشغيلية مع مدير المنطقة','رفع تقرير بالمشاكل التشغيلية مع خطة حل','إعادة تنظيم بيئة العمل وتوضيح المعايير'],
+      tools: ['تدريب عملي على الأنظمة خطوة بخطوة','وضع مرجع سريع (Quick Reference Card) للاستخدام','التواصل مع فريق IT للدعم والحل'],
+    };
+    return dimActions[dim] || dimActions.skill;
+  };
+
+  const dimC  = {will:'var(--amber)',know:'var(--blue)',skill:'var(--green)',env:'var(--red)',tools:'var(--purple)'};
+  const dimBg = {will:'var(--amber-bg)',know:'var(--accent-dim)',skill:'var(--green-bg)',env:'var(--red-bg)',tools:'var(--purple-bg)'};
+  const dimLabels = {will:'🎯 الرغبة (Will)',know:'📚 المعرفة (Know)',skill:'💪 المهارة (Skill)',env:'🏪 البيئة (Env)',tools:'🛠️ الأدوات (Tools)'};
+
+  const filtered = actions.filter(a => {
+    if (filter==='all')          return true;
+    if (filter==='pending')      return a.status==='pending';
+    if (filter==='inprogress')   return a.status==='inprogress';
+    if (filter==='done')         return a.status==='done';
+    if (filter==='urgent-only')  return a.priority==='urgent' && a.status!=='done';
+    return true;
+  });
+
+  if (!filtered.length) return `<div style="text-align:center;padding:50px 20px;color:var(--text-muted)">
+    <div style="font-size:36px;margin-bottom:12px">✅</div>
+    <div style="font-weight:600;font-size:14px">لا توجد إجراءات في هذه الفئة</div>
+  </div>`;
+
+  return filtered.map((a, i) => {
+    const sv = apItems[a.id] || {};
+    const status    = sv.status || a.status || 'pending';
+    const isOverdue = status!=='done' && a.due && a.due < today;
+    const isDone    = status==='done';
+    const isIP      = status==='inprogress';
+    const cfg       = statusCfg[status] || statusCfg.pending;
+    const savedCause= sv.cause || '';
+    const effectiveDim = detectDim(a, savedCause);
+    const causeSuggestions  = getCauseSuggestions(a);
+    const actionSuggestions = getActionSuggestions(a, savedCause);
+    const savedAction = sv.action || a.action || '';
+    const savedResponsible = sv.responsible || a.responsible || '';
+
+    return `<div id="ap-card-${a.id}" style="
+      background:${cfg.cardBg};
+      border:1.5px solid ${isOverdue?'var(--red)':cfg.border};
+      border-radius:var(--radius);
+      padding:14px 16px;
+      margin-bottom:10px;
+      transition:all .2s;
+      ${isDone?'opacity:.75;':''}
+      position:relative;overflow:hidden">
+
+      ${isOverdue?`<div style="position:absolute;top:0;right:0;background:var(--red);color:#fff;font-size:9px;font-weight:700;padding:3px 12px;border-radius:0 var(--radius) 0 8px">⏰ متأخر</div>`:''}
+
+      <div style="display:flex;align-items:flex-start;gap:12px">
+        <!-- Number circle -->
+        <div style="width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;flex-shrink:0;margin-top:2px;
+          background:${cfg.btnBg};color:${cfg.btnColor};border:2px solid ${cfg.btnBorder}">${i+1}</div>
+
+        <div style="flex:1;min-width:0">
+
+          <!-- Tags row -->
+          <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px">
+            <span style="font-size:10.5px;padding:2px 9px;border-radius:99px;font-weight:700;background:${prBg[a.priority]};color:${prColors[a.priority]}">${prLabel[a.priority]}</span>
+            <span style="font-size:10.5px;padding:2px 9px;border-radius:99px;font-weight:700;background:var(--surface-2);color:var(--text-muted)">${a.emoji||''} ${a.section}</span>
+            <span style="font-size:10.5px;padding:2px 9px;border-radius:99px;font-weight:700;background:${dimBg[effectiveDim]};color:${dimC[effectiveDim]}">${dimLabels[effectiveDim]}</span>
+            ${a.pct!=null?`<span style="font-size:10.5px;padding:2px 9px;border-radius:99px;font-weight:700;background:var(--surface-2);color:var(--text-muted)">${a.pct}%</span>`:''}
+          </div>
+
+          <!-- Problem -->
+          <div style="font-size:13px;font-weight:600;color:var(--navy);line-height:1.5;margin-bottom:10px;${isDone?'text-decoration:line-through;opacity:.65':''}">
+            ${a.problem}
+          </div>
+
+          <!-- Cause + Action grid -->
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+            <div>
+              <div style="font-size:9.5px;font-weight:700;color:var(--text-light);letter-spacing:.4px;margin-bottom:5px">سبب المشكلة الجذري</div>
+              <select onchange="saveApCause('${a.id}',this.value,this)"
+                style="width:100%;padding:7px 9px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:11.5px;font-family:var(--font);color:var(--text);background:var(--surface);outline:none;cursor:pointer;transition:border-color .15s"
+                onfocus="this.style.borderColor='var(--blue)'" onblur="this.style.borderColor='var(--border)'">
+                <option value="">— اختار السبب الجذري —</option>
+                ${causeSuggestions.map(opt=>`<option value="${opt}"${savedCause===opt?' selected':''}>${opt}</option>`).join('')}
+              </select>
+            </div>
+            <div>
+              <div style="font-size:9.5px;font-weight:700;color:var(--text-light);letter-spacing:.4px;margin-bottom:5px">الإجراء / الأكشن المطلوب</div>
+              <select onchange="saveApAction('${a.id}',this.value)"
+                style="width:100%;padding:7px 9px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:11.5px;font-family:var(--font);color:var(--text);background:var(--surface);outline:none;cursor:pointer;transition:border-color .15s"
+                onfocus="this.style.borderColor='var(--blue)'" onblur="this.style.borderColor='var(--border)'">
+                <option value="">— اختار الإجراء —</option>
+                ${actionSuggestions.map(opt=>`<option value="${opt}"${savedAction===opt?' selected':''}>${opt}</option>`).join('')}
+                <option value="إجراء آخر (اكتبه في الملاحظات)"${savedAction==='إجراء آخر (اكتبه في الملاحظات)'?' selected':''}>إجراء آخر (اكتبه في الملاحظات)</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Due + Responsible grid -->
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+            <div>
+              <div style="font-size:9.5px;font-weight:700;color:var(--text-light);letter-spacing:.4px;margin-bottom:5px">المسؤول عن التنفيذ</div>
+              <select onchange="saveApResponsible('${a.id}',this.value)"
+                style="width:100%;padding:7px 9px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:11.5px;font-family:var(--font);color:var(--navy);background:var(--surface);font-weight:600;outline:none;cursor:pointer"
+                onfocus="this.style.borderColor='var(--blue)'" onblur="this.style.borderColor='var(--border)'">
+                ${(['مدير الفرع','مدير المنطقة','المستشار','المستشار + مدير الفرع','فريق IT','إدارة المبيعات','فريق التدريب والتطوير']).map(opt=>
+                  `<option value="${opt}"${savedResponsible===opt?' selected':''}>${opt}</option>`
+                ).join('')}
+              </select>
+            </div>
+            <div>
+              <div style="font-size:9.5px;font-weight:700;color:var(--text-light);letter-spacing:.4px;margin-bottom:5px">Due Date (تاريخ الاستحقاق)</div>
+              <input type="date" value="${sv.due||a.due}" onchange="updateApDue('${a.id}',this.value)"
+                style="width:100%;padding:7px 9px;border:1.5px solid ${isOverdue?'var(--red)':'var(--border)'};border-radius:var(--radius-sm);font-size:11.5px;font-family:var(--font);color:${isOverdue?'var(--red)':'var(--text)'};background:var(--surface);outline:none;font-weight:${isOverdue?'700':'400'}"/>
+            </div>
+          </div>
+
+          <!-- Notes -->
+          <textarea placeholder="ملاحظات إضافية أو تفاصيل التنفيذ..." oninput="saveApNote('${a.id}',this.value)"
+            style="width:100%;font-size:11.5px;padding:8px 10px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:var(--font);color:var(--text);background:var(--surface);resize:none;min-height:38px;max-height:80px;outline:none;margin-bottom:10px;transition:border-color .15s"
+            onfocus="this.style.borderColor='var(--blue)'" onblur="this.style.borderColor='var(--border)'"
+            >${sv.note||''}</textarea>
+
+          <!-- Status buttons -->
+          <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">
+            ${['pending','inprogress','done'].map(s => {
+              const c = statusCfg[s];
+              const isActive = status===s;
+              return `<button onclick="setApStatus('${a.id}','${s}')"
+                style="padding:6px 16px;border-radius:99px;font-size:11.5px;font-weight:700;font-family:var(--font);cursor:pointer;transition:all .18s;
+                border:1.5px solid ${isActive?c.btnBorder:'var(--border)'};
+                background:${isActive?c.btnBg:'var(--surface)'};
+                color:${isActive?c.btnColor:'var(--text-muted)'};
+                ${isActive?'box-shadow:0 2px 6px rgba(0,0,0,.1);transform:translateY(-1px)':''}">
+                ${c.icon} ${c.label}</button>`;
+            }).join('')}
+            ${isDone && sv.doneDate?`<span style="margin-right:auto;font-size:10.5px;color:var(--green);font-family:var(--mono);font-weight:700">✓ ${sv.doneDate}</span>`:''}
+          </div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function setApStatus(id, status) {
+  if (!apItems[id]) apItems[id] = {};
+  apItems[id].status = status;
+  apItems[id].done = (status==='done');
+  if (status==='done' && !apItems[id].doneDate) {
+    apItems[id].doneDate = new Date().toISOString().split('T')[0];
+  }
+  buildActionPlan();
+  apSetTabActive(window._apCurrentFilter||'all');
+}
+
+function updateApDue(id, val) {
+  if (!apItems[id]) apItems[id] = {};
+  apItems[id].due = val;
+  // No re-render needed - just save
+}
+
+function saveApResponsible(id, val) {
+  if (!apItems[id]) apItems[id] = {};
+  apItems[id].responsible = val;
+}
+
+function cycleApStatus(id) {
+  const current = (apItems[id]||{}).status||'pending';
+  const next = {pending:'inprogress', inprogress:'done', done:'pending'}[current]||'pending';
+  setApStatus(id, next);
+}
+
+function saveApNote(id, val) {
+  if (!apItems[id]) apItems[id] = {};
+  apItems[id].note = val;
+}
+
+function saveApAction(id, val) {
+  if (!apItems[id]) apItems[id] = {};
+  apItems[id].action = val;
+}
+
+function saveApCause(id, val, selectEl) {
+  if (!apItems[id]) apItems[id] = {};
+  apItems[id].cause = val;
+  // Clear saved action so new suggestions show (only if cause changes meaningfully)
+  if (apItems[id].action && val) apItems[id].action = '';
+  // Re-render this card only
+  const filter = window._apCurrentFilter || 'all';
+  const c = document.getElementById('ap-container');
+  if (c && c._actions) {
+    const cardEl = document.getElementById('ap-card-'+id);
+    if (cardEl) {
+      const a = c._actions.find(x=>x.id===id);
+      if (a) {
+        a.status = apItems[id].status || a.status;
+        const newHtml = apRenderCards([a], 'all');
+        const tmp = document.createElement('div');
+        tmp.innerHTML = newHtml;
+        cardEl.replaceWith(tmp.firstElementChild);
+      }
+    }
+  }
+}
+
+function filterAP(filter) {
+  window._apCurrentFilter = filter;
+  const c = document.getElementById('ap-container');
+  if (!c || !c._actions) return;
+  const cardsCont = document.getElementById('ap-cards-container');
+  if (cardsCont) cardsCont.innerHTML = apRenderCards(c._actions, filter);
+  apSetTabActive(filter);
+}
+
+function apSetTabActive(filter) {
+  ['all','pending','inprogress','done','urgent-only'].forEach(f => {
+    const btn = document.getElementById('ap-tab-'+f);
+    if (!btn) return;
+    const isActive = f===filter;
+    btn.style.background = isActive ? 'var(--navy)' : 'var(--surface)';
+    btn.style.color      = isActive ? '#fff' : 'var(--text)';
+    btn.style.borderColor= isActive ? 'var(--navy)' : 'var(--border)';
+  });
 }
 
 function toggleApDone(id, checked) {
-  if (!apItems[id]) apItems[id] = {};
-  apItems[id].done = checked;
-  if (checked && !apItems[id].doneDate) {
-    apItems[id].doneDate = new Date().toISOString().split('T')[0];
-  }
-  buildActionPlan(); // re-render
-}
-
-function setApDoneDate(id, date) {
-  if (!apItems[id]) apItems[id] = {};
-  apItems[id].doneDate = date;
-}
-
-function updateApDue(id, date) {
-  if (!apItems[id]) apItems[id] = {};
-  apItems[id].due = date;
+  setApStatus(id, checked?'done':'pending');
 }
 
 function exportActionPlan() {
   const c = document.getElementById('ap-container');
-  const actions = c._actions || [];
+  const actions = c && c._actions ? c._actions : [];
   const meta = _getMeta();
-  const rows = ['#,Problem / Development Point,Section,Dimension,Required Action,Responsible,Due Date,Priority,Status,Completion Date'];
-  actions.forEach((a, i) => {
-    const saved = apItems[a.id] || {};
-    const priority = {urgent:'Urgent',high:'High',medium:'Medium'}[a.priority] || a.priority;
-    const status = saved.done ? 'Done' : 'In Progress';
-    rows.push([i+1, '"'+a.problem+'"', '"'+a.section+'"', dimLabel(a.dim), '"'+a.action+'"', '"'+a.responsible+'"', saved.due||a.due, priority, status, saved.doneDate||''].join(','));
-  });
-  const csv = '\uFEFF' + rows.join('\r\n');
-  const blob = new Blob([csv], {type:'text/csv;charset=utf-8'});
-  const url = URL.createObjectURL(blob);
-  const lnk = document.createElement('a');
-  lnk.href = url;
-  lnk.download = 'ActionPlan_' + (meta.bname||'Visit').replace(/\s+/g,'_') + '_' + (meta.bdate||'') + '.csv';
-  document.body.appendChild(lnk); lnk.click();
-  document.body.removeChild(lnk); URL.revokeObjectURL(url);
-}
+  if (!actions.length) { alert('لا توجد بيانات لتصديرها'); return; }
 
-function submitVisit() {
-  const meta = _getMeta();
-  const d1 = _getD1Data();
-  if (!meta.bname || d1.total === null) {
-    alert('يرجى اختيار الفرع وإكمال بيانات يوم التشخيص أولاً قبل التسجيل');
-    return;
-  }
-  const payload = {
-    branch: meta.bname, branchIdx: document.getElementById('sel-branch').value,
-    mgr: document.getElementById('inp-mgr').value,
-    area: document.getElementById('inp-area').value,
-    region: document.getElementById('inp-region').value,
-    date: meta.bdate, inspector: meta.inspector, hrid: meta.hrid,
-    score: d1.total, grade: d1.grade,
-    dimScores: d1.dimScores,
-    sectionScores: d1.secResults.map(s=>({id:s.id,title:s.title,pct:s.pct,dim:s.dim})),
-    weakSections: d1.weakSecs.map(s=>s.title),
-    observations: {...obsData},
-    answers: {...ans},
-    actionPlan: Object.fromEntries(Object.entries(apItems)),
-    submittedAt: new Date().toISOString(),
-    version: '2.0'
+  const today = new Date().toISOString().split('T')[0];
+  const isOverdue = a => (apItems[a.id]||{}).status !== 'done' && a.due && a.due < today;
+
+  const statusMap   = { pending:'قيد الانتظار', inprogress:'جاري التنفيذ', done:'مكتمل' };
+  const priorityMap = { urgent:'🔴 عاجل', high:'🟠 مرتفع', medium:'🟡 متوسط' };
+  const dimAr = { will:'الرغبة (Will)', know:'المعرفة (Know)', skill:'المهارة (Skill)', env:'البيئة (Env)', tools:'الأدوات (Tools)' };
+
+  // Count summaries
+  const byStatus = s => actions.filter(a=>(apItems[a.id]||{}).status===s||(!apItems[a.id]&&a.status===s)).length;
+  const done=byStatus('done'), inprog=byStatus('inprogress'), pending=byStatus('pending');
+  const overdue=actions.filter(a=>isOverdue(a)).length;
+
+  // CSV cells helper
+  const cell = v => {
+    const s = String(v == null ? '' : v);
+    return (s.includes(',') || s.includes('"') || s.includes('\n'))
+      ? '"' + s.replace(/"/g, '""') + '"' : s;
+  };
+  const row = (...cols) => cols.map(cell).join(',');
+
+  const lines = [];
+
+  // ── HEADER ──
+  lines.push(row('RAYA TRADE — Field Action Plan'));
+  lines.push(row('الفرع', meta.bname || '', 'التاريخ', meta.bdate || '', 'المُقيِّم', meta.inspector || '', 'HRID', meta.hrid || ''));
+  lines.push(row('تاريخ التصدير', today));
+  lines.push('');
+
+  // ── SUMMARY ──
+  lines.push(row('ملخص خطة العمل'));
+  lines.push(row('إجمالي الإجراءات', actions.length, 'مكتمل', done, 'جاري التنفيذ', inprog, 'قيد الانتظار', pending, 'متأخر', overdue));
+  lines.push(row('نسبة الإنجاز', actions.length ? Math.round(done/actions.length*100)+'%' : '0%'));
+  lines.push('');
+
+  // ── TABLE HEADER ──
+  lines.push(row(
+    '#',
+    'القسم / المحور',
+    'المشكلة / نقطة الضعف',
+    'شرح المشكلة (السبب الجذري)',
+    'البُعد التشخيصي',
+    'نقطة التطوير المطلوبة (الهدف)',
+    'الإجراء / الأكشن المطلوب',
+    'المسؤول عن التنفيذ',
+    'Due Date (تاريخ الاستحقاق)',
+    'الأولوية',
+    'الحالة الحالية',
+    'تاريخ الإنجاز الفعلي',
+    'متأخر؟',
+    'ملاحظات إضافية'
+  ));
+
+  // ── DATA ROWS ──
+  const causeMap = {
+    'غياب التدريب الأساسي على المهارة':  'الموظف لم يتلقَّ تدريباً كافياً على هذه المهارة — فجوة في المحتوى التدريبي',
+    'ضعف في المعرفة بالمنتج أو السياسة': 'لا يعرف تفاصيل المنتج أو الإجراء الصح — يحتاج تحديث معرفي',
+    'غياب المتابعة اليومية من المدير':    'مدير الفرع لا يراقب أو يصحح السلوك بشكل يومي — مشكلة إشراف',
+    'ضعف في الدافعية والرغبة':            'الموظف يعرف المطلوب لكنه لا يطبقه — مشكلة إرادة وتحفيز وليست تدريب',
+    'بيئة عمل غير مواتية':               'الظروف التشغيلية أو الموارد لا تدعم الأداء الجيد',
+    'ضغط عمل عالٍ وقلة الموارد':         'حجم العمل أو نقص الموارد يحول دون الأداء المثالي',
+    'غياب النموذج الصحيح (Role Model)':   'لا يوجد مثال تطبيقي واضح يقتدى به في الفرع',
+    'عدم وضوح المعيار المطلوب':           'المعيار المطلوب غير محدد أو غير معلوم للموظف',
+    'مشكلة تقنية في الأنظمة':            'النظام أو الأدوات التقنية تعيق الأداء أو لم يتدرب عليها كافياً',
+    'سبب آخر (يُذكر في الملاحظات)':      'انظر عمود الملاحظات للتفاصيل'
   };
 
-  // Save to localStorage for dashboard
-  const visits = JSON.parse(localStorage.getItem('raya_visits') || '[]');
-  const existingIdx = visits.findIndex(v => v.branch===payload.branch && v.date===payload.date);
-  if (existingIdx >= 0) {
-    visits[existingIdx] = payload;
-  } else {
-    visits.push(payload);
-  }
-  localStorage.setItem('raya_visits', JSON.stringify(visits));
-  allVisits = visits;
+  // Development goal per dim
+  const goalMap = {
+    will:  'رفع مستوى الالتزام والرغبة في التطبيق — من معرفة بدون تطبيق إلى تطبيق منتظم وثابت',
+    know:  'سد الفجوة المعرفية — أن يصبح الموظف قادراً على الإجابة بثقة وصحة على أسئلة المنتج والسياسات',
+    skill: 'تحويل المعرفة إلى مهارة تطبيقية سلسة تحت ضغط البيع الحقيقي مع العميل',
+    env:   'تصحيح البيئة التشغيلية لتكون داعمة للأداء الجيد وليس عائقاً له',
+    tools: 'تحقيق كفاءة تقنية كاملة في استخدام الأنظمة بدون تردد أو طلب مساعدة'
+  };
 
-  // Show success
-  const toast = document.createElement('div');
-  toast.style.cssText = 'position:fixed;inset:0;background:rgba(0,30,90,.8);z-index:9999;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px)';
-  toast.innerHTML = `<div style="background:#fff;border-radius:16px;padding:32px 36px;text-align:center;max-width:360px;box-shadow:0 20px 60px rgba(0,0,0,.3)">
-    <div style="font-size:48px;margin-bottom:12px">✅</div>
-    <div style="font-size:18px;font-weight:800;color:var(--navy);margin-bottom:8px">تم تسجيل الزيارة</div>
-    <div style="font-size:13px;color:var(--text-muted);line-height:1.6;margin-bottom:20px">
-      <strong>${meta.bname}</strong><br/>
-      النتيجة: <strong style="color:${d1.total>=75?'var(--green)':d1.total>=60?'var(--blue)':'var(--red)'}">${d1.total}% — ${d1.grade}</strong><br/>
-      <span style="font-size:11px;margin-top:4px;display:block;color:var(--text-light)">تم الحفظ محلياً — اربطه بالباك اند لاحقاً</span>
-    </div>
-    <div style="display:flex;gap:8px;justify-content:center">
-      <button onclick="this.closest('[style*=inset]').remove()" style="padding:10px 22px;background:var(--navy);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:var(--font)">حسناً</button>
-      <button onclick="window.open('raya_dashboard.html','_blank');this.closest('[style*=inset]').remove()" style="padding:10px 22px;background:var(--accent-dim);color:var(--blue);border:1.5px solid var(--blue);border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:var(--font)">فتح الداشبورد</button>
-    </div>
-  </div>`;
-  document.body.appendChild(toast);
+  actions.forEach((a, i) => {
+    const sv = apItems[a.id] || {};
+    const status   = sv.status  || a.status  || 'pending';
+    const dueDate  = sv.due     || a.due     || '';
+    const doneDate = sv.doneDate || '';
+    const note     = sv.note    || '';
+    const cause    = sv.cause   || '';
+    const causeExpl = causeMap[cause] || (cause || 'لم يُحدَّد بعد');
+    const goal = goalMap[a.dim] || 'تحسين الأداء في هذا المحور';
+
+    lines.push(row(
+      i + 1,                              // #
+      (a.emoji || '') + ' ' + a.section,  // القسم
+      a.problem,                          // المشكلة / نقطة الضعف
+      causeExpl,                          // شرح المشكلة (السبب الجذري)
+      dimAr[a.dim] || a.dim,             // البُعد التشخيصي
+      goal,                               // نقطة التطوير المطلوبة
+      a.action,                           // الإجراء / الأكشن المطلوب
+      a.responsible,                      // المسؤول
+      dueDate,                            // Due Date
+      priorityMap[a.priority] || a.priority, // الأولوية
+      statusMap[status] || status,        // الحالة
+      doneDate,                           // تاريخ الإنجاز
+      isOverdue(a) ? 'نعم ⚠️' : 'لا',   // متأخر؟
+      note                                // ملاحظات
+    ));
+  });
+
+  const csv = '\uFEFF' + lines.join('\r\n');
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+  const url  = URL.createObjectURL(blob);
+  const lnk  = document.createElement('a');
+  lnk.href     = url;
+  lnk.download = 'ActionPlan_' + (meta.bname || 'Visit').replace(/\s+/g, '_') + '_' + today + '.csv';
+  document.body.appendChild(lnk);
+  lnk.click();
+  document.body.removeChild(lnk);
+  URL.revokeObjectURL(url);
 }
 
-// ==================== DAY 2 DYNAMIC BUILD ====================
 function buildDay2Dynamic() {
   const container = document.getElementById('d2-dynamic-content');
   if (!container) return;
-
   const d1 = _getD1Data();
   const meta = _getMeta();
 
-  // Gather weak questions per section
+  // ── No data guard ──
+  if (d1.total === null) {
+    container.innerHTML = `<div style="background:var(--amber-bg);border:1.5px solid var(--amber);border-radius:var(--radius-lg);padding:32px;text-align:center;margin:20px">
+      <div style="font-size:36px;margin-bottom:12px">⚠️</div>
+      <div style="font-size:15px;font-weight:700;color:var(--navy)">يوم 1 لم يكتمل بعد</div>
+      <div style="font-size:12px;color:var(--text-muted);margin-top:6px;line-height:1.7">أكمل تشيك ليست يوم التشخيص أولاً<br/>يوم 2 يتولد تلقائياً من نتائجك</div>
+      <button onclick="switchDay(1)" style="margin-top:16px;padding:9px 24px;background:var(--navy);color:#fff;border:none;border-radius:var(--radius-sm);font-size:13px;font-weight:700;font-family:var(--font);cursor:pointer">ابدأ يوم 1 ←</button>
+    </div>`;
+    return;
+  }
+
+  // ── Build weak items map from Day 1 ──
   const weakItems = {};
   SECTIONS_D1.forEach(sec => {
     const pct = calcSection(sec);
     if (pct === null) return;
-    const weakQs = sec.questions.filter(q => {
-      if (!q.id || !q.type || q.type === 'obs_only') return false;
-      const v = ans[q.id];
-      return v === 'no' || v === 'nt' || (q.type === 'rate5' && v && parseInt(v) <= 2);
-    });
-    const partialQs = sec.questions.filter(q => {
-      if (!q.id || !q.type || q.type === 'obs_only') return false;
-      const v = ans[q.id];
-      return v === 'partial' || (q.type === 'rate5' && v && parseInt(v) === 3);
-    });
+    const weakQs    = sec.questions.filter(q => q.id && q.type && q.type !== 'obs_only' && (ans[q.id]==='no' || ans[q.id]==='nt' || (q.type==='rate5' && ans[q.id] && parseInt(ans[q.id])<=2)));
+    const partialQs = sec.questions.filter(q => q.id && q.type && q.type !== 'obs_only' && (ans[q.id]==='partial' || (q.type==='rate5' && ans[q.id] && parseInt(ans[q.id])===3)));
     if (weakQs.length || partialQs.length || pct < 70) {
-      weakItems[sec.id] = {sec, pct, weakQs, partialQs};
+      weakItems[sec.id] = { sec, pct, weakQs, partialQs };
     }
   });
+  const hasWeak = Object.keys(weakItems).length > 0;
 
-  const hasData = Object.keys(weakItems).length > 0 || d1.total !== null;
-
+  const scoreColor = d1.total>=80?'#34d399':d1.total>=65?'#60a5fa':d1.total>=45?'#fbbf24':'#f87171';
   let html = '';
 
-  // ── HEADER ALERT ──
-  if (!hasData || d1.total === null) {
-    html += `<div style="background:var(--bg-warning);border:1px solid var(--border-warning);border-radius:12px;padding:20px 24px;margin-bottom:16px;text-align:center">
-      <div style="font-size:18px;margin-bottom:8px">⚠️</div>
-      <div style="font-size:14px;font-weight:600;color:var(--text-warning)">يوم 1 لم يكتمل بعد</div>
-      <div style="font-size:12px;color:var(--text-secondary);margin-top:4px">أكمل تشيك ليست يوم التشخيص أولاً — ستظهر هنا خطة التطوير تلقائياً بناءً على المشاكل المكتشفة</div>
-    </div>`;
-    container.innerHTML = html;
-    return;
-  }
-
-  const scoreColor = d1.total>=80?'#1a7a1a':d1.total>=60?'#1565c0':d1.total>=45?'#b8860b':'#c0392b';
-
-  // ── BRIDGE SUMMARY ──
-  html += `<div style="background:var(--navy);border-radius:12px;padding:16px 20px;margin-bottom:16px;color:#fff">
-    <div style="font-size:10px;color:rgba(255,255,255,.6);margin-bottom:8px;text-transform:uppercase;letter-spacing:.8px">خطة التطوير — مبنية على نتائج يوم 1</div>
-    <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap">
-      <div style="text-align:center;min-width:70px">
-        <div style="font-size:34px;font-weight:800;color:${scoreColor}">${d1.total}%</div>
-        <div style="font-size:10px;color:rgba(255,255,255,.6)">يوم التشخيص</div>
+  // ══════════════════════════════════════
+  // BRIDGE SUMMARY (ثابت دايماً)
+  // ══════════════════════════════════════
+  html += `<div style="background:linear-gradient(135deg,var(--navy) 0%,#003080 100%);border-radius:var(--radius-lg);padding:18px 20px;margin-bottom:16px;color:#fff">
+    <div style="font-size:10px;color:rgba(255,255,255,.55);letter-spacing:.7px;margin-bottom:10px">يوم 2 — التطوير والكوتشينج · مبني على نتائج يوم 1</div>
+    <div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap">
+      <div style="text-align:center;min-width:72px">
+        <div style="font-size:36px;font-weight:800;color:${scoreColor};font-family:var(--mono)">${d1.total}%</div>
+        <div style="font-size:10px;color:rgba(255,255,255,.55);margin-top:2px">${d1.grade}</div>
       </div>
       <div style="flex:1;min-width:180px">
-        <div style="font-size:13px;font-weight:700;color:#fff;margin-bottom:6px">${d1.grade}</div>
-        <div style="font-size:11.5px;color:rgba(255,255,255,.8);line-height:1.6">
-          ${d1.weakSecs.length === 0 ? '✅ لا توجد فجوات حرجة — التركيز على التعزيز والتطوير' :
-            `❌ ${d1.weakSecs.length} قسم يحتاج تدخلاً — ${d1.weakSecs.map(s=>s.title).join(' · ')}`}
+        <div style="font-size:12px;color:rgba(255,255,255,.8);margin-bottom:6px;line-height:1.6">
+          ${!hasWeak
+            ? '✅ لا توجد فجوات حرجة — ركّز على التعزيز والاستمرارية'
+            : `❌ ${Object.keys(weakItems).length} قسم يحتاج تطوير — ${Object.values(weakItems).sort((a,b)=>a.pct-b.pct).slice(0,3).map(w=>w.sec.emoji+' '+w.sec.title).join(' · ')}`}
+        </div>
+        <div style="display:flex;gap:12px;font-size:11px;color:rgba(255,255,255,.6)">
+          <span>🔴 ضعيف: <strong style="color:#f87171">${Object.values(weakItems).filter(w=>w.pct<45).length}</strong></span>
+          <span>🟠 متوسط: <strong style="color:#fbbf24">${Object.values(weakItems).filter(w=>w.pct>=45&&w.pct<60).length}</strong></span>
+          <span>🟡 تحسين: <strong style="color:#a3e635">${Object.values(weakItems).filter(w=>w.pct>=60&&w.pct<70).length}</strong></span>
         </div>
       </div>
-      <div style="text-align:center;min-width:80px">
-        <div style="font-size:22px;font-weight:800;color:var(--accent)">${Object.values(weakItems).reduce((t,{weakQs})=>t+weakQs.length,0)}</div>
-        <div style="font-size:10px;color:rgba(255,255,255,.6)">نقطة ضعف محددة</div>
+      <div style="text-align:center;min-width:70px">
+        <div style="font-size:26px;font-weight:800;color:var(--accent);font-family:var(--mono)">${Object.values(weakItems).reduce((t,{weakQs})=>t+weakQs.length,0)}</div>
+        <div style="font-size:10px;color:rgba(255,255,255,.55)">نقطة ضعف</div>
       </div>
     </div>
   </div>`;
 
-  // ── COACHING FOCUS (auto-generated from weak points) ──
-  if (Object.keys(weakItems).length > 0) {
-    html += `<div class="section" style="border:2px solid #c0392b;border-radius:12px;margin-bottom:14px;overflow:hidden">
-      <div class="sec-header" onclick="toggleSec('d2_focus')" style="background:linear-gradient(135deg,#fdecea,#fff)">
+  // ══════════════════════════════════════
+  // DYNAMIC: محاور الكوتشينج (90% من يوم 1)
+  // ══════════════════════════════════════
+  if (hasWeak) {
+    // Coaching scripts per dim type
+    const dimCoachScript = {
+      will: {
+        intro: 'مشكلة إرادة وتحفيز — الموظف يعرف لكنه لا يطبق. الكوتشينج هنا يُحرّك الدافعية ويخلق مسؤولية شخصية.',
+        steps: [
+          'اسأله: "إيه اللي بيخليك مش بتعمل ده؟" — استمع بدون مقاطعة',
+          'استخدم تقنية المرآة: "لما عميل دخل ولقيتك [X]، ايه اللي فاكرك ده بيقول عن الفرع؟"',
+          'حدد معه هدف شخصي محدد وقابل للقياس للأسبوع الجاي',
+          'اتفق على متابعة يومية (2 دقيقة) مع مدير الفرع'
+        ]
+      },
+      know: {
+        intro: 'فجوة معرفية — الموظف لا يعرف المعلومة الصحيحة. الكوتشينج هنا يملأ الفجوة بطريقة تثبّت المعلومة.',
+        steps: [
+          'ابدأ بسؤال: "لو عميل سألك [السؤال الضعيف] — هتقوله إيه؟" — استمع وسجّل',
+          'صحّح بطريقة تبني على ما قاله — لا تصحح بشكل مباشر فج',
+          'اطلب منه يشرح المعلومة الصحيحة لك بأسلوبه',
+          'عمل اختبار سريع بعد 30 دقيقة للتأكد من الترسيخ'
+        ]
+      },
+      skill: {
+        intro: 'فجوة تطبيق — يعرف النظرية لكنها لم تتحول لمهارة سلسة. Role Play هو الأداة الوحيدة هنا.',
+        steps: [
+          'العب دور العميل — الموظف يطبق المهارة أمامك فوراً',
+          'وقّفه فقط عند الأخطاء الجوهرية — لا تقاطعه على كل شيء',
+          'بعد الـ Role Play: "إيه اللي حسيت إنك عملته كويس؟ إيه اللي كنت ممكن تعمله تاني؟"',
+          'اطلب منه يكرر المشهد مع تطبيق التحسين فوراً'
+        ]
+      },
+      env: {
+        intro: 'مشكلة بيئة تشغيلية — العائق ليس في الشخص بل في الظروف المحيطة. التدخل هنا إداري.',
+        steps: [
+          'وثّق المشكلة بالتفصيل: ما + متى + كيف يؤثر على العميل',
+          'ناقش مع مدير الفرع: ما في إيده إنه يحله الآن؟ وما يحتاج تصعيد؟',
+          'حدد إجراء تصحيحي فوري (خلال 24 ساعة) وإجراء مستدام (خلال أسبوع)',
+          'سجّل القرارات كتابياً واتفق على مسؤول ومتابعة'
+        ]
+      },
+      tools: {
+        intro: 'ضعف تقني — الموظف لا يستخدم الأدوات بكفاءة. التدريب هنا عملي خطوة بخطوة.',
+        steps: [
+          'اطلب منه يطبق المهمة على النظام أمامك — لاحظ أين يتوقف أو يتردد',
+          'اشرح الخطوات بينما تطبق معه (Show-Do-Review)',
+          'اطلب منه يكرر الخطوات وحده مباشرة',
+          'ضع Quick Reference Card في مكان ظاهر بالفرع'
+        ]
+      }
+    };
+
+    html += `<div class="section" style="border:2px solid var(--red);border-radius:var(--radius-lg);margin-bottom:14px;overflow:hidden">
+      <div class="sec-header" onclick="toggleSec('d2_coaching_focus')" style="background:linear-gradient(135deg,var(--red-bg),#fff)">
         <div class="sec-title">
-          <div class="sec-icon" style="background:#fdecea">🎯</div>
-          <div><div class="sec-name" style="color:#c0392b">محاور الكوتشينج — مستخرجة من يوم 1</div>
-          <div class="sec-sub">اضغط على كل محور لتدريب وتقييم التحسن</div></div>
+          <div class="sec-icon" style="background:var(--red-bg)">🎯</div>
+          <div>
+            <div class="sec-name" style="color:var(--red)">محاور الكوتشينج — من يوم 1</div>
+            <div class="sec-sub">${Object.keys(weakItems).length} محور · مرتبة من الأضعف للأقوى</div>
+          </div>
         </div>
-        <i class="ti ti-chevron-down chevron" id="chev_d2_focus" aria-hidden="true"></i>
+        <span class="chevron" id="chev_d2_coaching_focus">▾</span>
       </div>
-      <div class="sec-body open" id="body_d2_focus">`;
+      <div class="sec-body open" id="body_d2_coaching_focus">`;
 
     let focusNum = 0;
     Object.values(weakItems).sort((a,b) => a.pct - b.pct).forEach(({sec, pct, weakQs, partialQs}) => {
       focusNum++;
-      const priority = pct < 45 ? '🔴 عاجل' : pct < 60 ? '🟠 مرتفع' : '🟡 متوسط';
-      const dimAction = {
-        will: 'الأسلوب: كوتشينج تحفيزي + مرآة السلوك',
-        know: 'الأسلوب: تدريب معرفي + أسئلة واختبار سريع',
-        skill: 'الأسلوب: Role Play + تطبيق ومران فوري',
-        env: 'الأسلوب: تصحيح ميداني مباشر + إجراء تشغيلي',
-        tools: 'الأسلوب: تدريب عملي على النظام خطوة بخطوة'
-      }[sec.dim] || '';
+      const priority = pct<45?'🔴 عاجل — تدخل فوري':pct<60?'🟠 أولوية — خطة أسبوعية':'🟡 تحسين — متابعة منتظمة';
+      const prColor  = pct<45?'var(--red)':pct<60?'var(--amber)':'#92400e';
+      const prBg     = pct<45?'var(--red-bg)':pct<60?'var(--amber-bg)':'#fef9c3';
+      const script   = dimCoachScript[sec.dim] || dimCoachScript.skill;
 
-      html += `<div style="border:1px solid var(--border);border-radius:8px;margin-bottom:10px;overflow:hidden">
-        <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--surface-2);cursor:pointer;border-radius:var(--radius-sm)" onclick="toggleSec('focus_${sec.id}')">
-          <div style="width:28px;height:28px;border-radius:50%;background:${pct<45?'var(--red-bg)':pct<60?'var(--amber-bg)':'#fff3cd'};display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:${pct<45?'var(--red)':pct<60?'var(--amber)':'#92400e'};flex-shrink:0;border:2px solid ${pct<45?'var(--red)':pct<60?'var(--amber)':'#d97706'}">${focusNum}</div>
+      html += `<div style="border:1.5px solid var(--border);border-radius:var(--radius);margin-bottom:12px;overflow:hidden">
+        <div style="display:flex;align-items:center;gap:10px;padding:11px 14px;background:var(--surface-2);cursor:pointer" onclick="toggleSec('d2_sec_${sec.id}')">
+          <div style="width:30px;height:30px;border-radius:50%;background:${prBg};border:2px solid ${prColor};display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:${prColor};flex-shrink:0">${focusNum}</div>
           <div style="flex:1">
             <div style="font-size:13px;font-weight:700;color:var(--navy)">${sec.emoji} ${sec.title}</div>
-            <div style="font-size:11px;color:var(--text-muted);margin-top:2px">${priority} &nbsp;·&nbsp; <span style="font-weight:600;color:var(--navy)">${pct}%</span> &nbsp;·&nbsp; ${dimLabel(sec.dim)} &nbsp;·&nbsp; ${dimAction}</div>
+            <div style="font-size:11px;color:var(--text-muted);margin-top:2px">
+              <span style="color:${prColor};font-weight:600">${priority}</span>
+              &nbsp;·&nbsp; <span style="font-family:var(--mono);font-weight:700;color:var(--navy)">${pct}%</span>
+              &nbsp;·&nbsp; ${sec.dim==='will'?'🎯 الرغبة':sec.dim==='know'?'📚 المعرفة':sec.dim==='skill'?'💪 المهارة':sec.dim==='env'?'🏪 البيئة':'🛠️ الأدوات'}
+            </div>
           </div>
-          <span class="chevron" id="chev_focus_${sec.id}">▾</span>
+          <span class="chevron" id="chev_d2_sec_${sec.id}">▾</span>
         </div>
-        <div class="sec-body" id="body_focus_${sec.id}">`;
+        <div class="sec-body" id="body_d2_sec_${sec.id}">
 
-      // Specific weak points
-      if (weakQs.length) {
-        html += `<div style="margin-bottom:8px"><div style="font-size:11px;font-weight:700;color:#c0392b;margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px">نقاط الضعف المحددة من يوم 1:</div>`;
-        weakQs.forEach(q => {
-          html += `<div style="display:flex;align-items:flex-start;gap:8px;padding:6px 8px;border-radius:5px;background:var(--red-bg);margin-bottom:4px;font-size:12px">
-            <span style="color:var(--red);font-size:13px;flex-shrink:0;font-weight:700">✗</span>
-            <span style="color:#7f1d1d;font-weight:500">${q.text}</span>
-          </div>`;
-        });
-        html += `</div>`;
-      }
-      if (partialQs.length) {
-        html += `<div style="margin-bottom:8px"><div style="font-size:11px;font-weight:700;color:#b8860b;margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px">نقاط تحتاج تحسيناً:</div>`;
-        partialQs.forEach(q => {
-          html += `<div style="display:flex;align-items:flex-start;gap:8px;padding:6px 8px;border-radius:5px;background:var(--amber-bg);margin-bottom:4px;font-size:12px">
-            <span style="color:var(--amber);font-size:13px;flex-shrink:0;font-weight:700">△</span>
-            <span style="color:#78350f;font-weight:500">${q.text}</span>
-          </div>`;
-        });
-        html += `</div>`;
-      }
+          ${weakQs.length ? `<div style="margin-bottom:10px">
+            <div style="font-size:10px;font-weight:700;color:var(--red);letter-spacing:.5px;margin-bottom:6px">نقاط الضعف المرصودة في يوم 1:</div>
+            ${weakQs.map(q=>`<div style="display:flex;gap:8px;padding:6px 10px;background:var(--red-bg);border-radius:6px;margin-bottom:4px;font-size:12px">
+              <span style="color:var(--red);font-weight:700;flex-shrink:0">✗</span>
+              <span style="color:#7f1d1d;font-weight:500">${q.text}</span>
+            </div>`).join('')}
+          </div>` : ''}
 
-      // Coaching action specific to section
-      const sectionCoaching = {
-        s2: `<div style="background:#e8f4ff;border-radius:6px;padding:10px 12px;margin-top:8px;font-size:12px;color:#002060">
-          <strong>كيف تكوّش؟</strong><br/>
-          1. اطلب منه يمثل استقبال عميل جديد<br/>
-          2. وقّفه عند كل خطأ — اشرح صح — اطلبه يكرر<br/>
-          3. قيّم: هل اتحسن بعد المران؟ (1-5)
-        </div>`,
-        s3: `<div style="background:#e8f4ff;border-radius:6px;padding:10px 12px;margin-top:8px;font-size:12px;color:#002060">
-          <strong>كيف تكوّش؟</strong><br/>
-          1. العب دور عميل غير محدد — قول "مش عارف بالظبط"<br/>
-          2. هو يسأل — أنت تجاوب — لاحظ جودة أسئلته<br/>
-          3. هل وصل للـ Value والـ Pain قبل ما يعرض منتج؟
-        </div>`,
-        s4: `<div style="background:#e8f4ff;border-radius:6px;padding:10px 12px;margin-top:8px;font-size:12px;color:#002060">
-          <strong>كيف تكوّش؟</strong><br/>
-          1. اختار منتج ضعيف فيه — اسأله يشرحه بطريقة FAB<br/>
-          2. صحّح: ايه هو + هيفيدك ازاي + هيوفر عليك ايه<br/>
-          3. اعمل اختبار سريع على الضمان وسياسة الاسترجاع
-        </div>`,
-        s5: `<div style="background:#e8f4ff;border-radius:6px;padding:10px 12px;margin-top:8px;font-size:12px;color:#002060">
-          <strong>كيف تكوّش؟</strong><br/>
-          1. Role Play: اطلب منه يبيعلك — أنت العميل المتردد<br/>
-          2. قول "غالي" — شوف هل يدافع بالقيمة ولا ينهار؟<br/>
-          3. قيّم Closing: هل لخّص وطلب القرار؟
-        </div>`,
-        s7: `<div style="background:#e8f4ff;border-radius:6px;padding:10px 12px;margin-top:8px;font-size:12px;color:#002060">
-          <strong>كيف تكوّش؟</strong><br/>
-          1. اسأله: "ايه أفضل حل تقسيط دلوقتي لعميل دخله 5000؟"<br/>
-          2. شيك على معرفته بـ DBR 50% وشروط كل برنامج<br/>
-          3. تأكد إنه بيعرض التقسيط كـ Value مش كضغط
-        </div>`,
-        s9: `<div style="background:#e8f4ff;border-radius:6px;padding:10px 12px;margin-top:8px;font-size:12px;color:#002060">
-          <strong>كيف تكوّش؟</strong><br/>
-          1. Role Play: عميل قال "هفكر" — ايه هيعمل؟<br/>
-          2. هل طلب رقمه؟ هل سأل عن سبب التردد؟<br/>
-          3. قيّم التوديع النهائي — السكريبت + لغة الجسد
-        </div>`
-      };
-      const coaching = sectionCoaching[sec.id] || `<div style="background:#e8f4ff;border-radius:6px;padding:10px 12px;margin-top:8px;font-size:12px;color:#002060">
-        <strong>كيف تكوّش؟</strong><br/>
-        1. اشرح المطلوب بوضوح مع مثال عملي<br/>
-        2. اطلبه يطبق أمامك مباشرة (Role Play أو تدريب عملي)<br/>
-        3. قيّم التحسن وسجّل النتيجة أدناه
-      </div>`;
+          ${partialQs.length ? `<div style="margin-bottom:10px">
+            <div style="font-size:10px;font-weight:700;color:var(--amber);letter-spacing:.5px;margin-bottom:6px">نقاط تحتاج تحسيناً:</div>
+            ${partialQs.map(q=>`<div style="display:flex;gap:8px;padding:6px 10px;background:var(--amber-bg);border-radius:6px;margin-bottom:4px;font-size:12px">
+              <span style="color:var(--amber);font-weight:700;flex-shrink:0">△</span>
+              <span style="color:#78350f;font-weight:500">${q.text}</span>
+            </div>`).join('')}
+          </div>` : ''}
 
-      html += coaching;
+          <div style="background:#e8f0fe;border-radius:var(--radius-sm);padding:12px 14px;margin-bottom:12px;border-right:3px solid var(--blue)">
+            <div style="font-size:10px;font-weight:700;color:var(--blue);letter-spacing:.4px;margin-bottom:6px">أسلوب الكوتشينج الموصى به</div>
+            <div style="font-size:12px;color:#1e3a5f;margin-bottom:8px;line-height:1.55">${script.intro}</div>
+            ${script.steps.map((s,i)=>`<div style="display:flex;gap:8px;font-size:11.5px;color:#1e3a5f;margin-bottom:4px">
+              <span style="background:var(--blue);color:#fff;min-width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0;margin-top:1px">${i+1}</span>
+              <span>${s}</span>
+            </div>`).join('')}
+          </div>
 
-      // Improvement rating
-      html += `<div style="margin-top:10px">
-        <div style="font-size:11px;font-weight:700;color:var(--text-secondary);margin-bottom:6px">التحسن بعد الكوتشينج:</div>
-        <div style="display:flex;gap:6px;flex-wrap:wrap">
-          ${[1,2,3,4,5].map(n=>`<button class="r-btn" onclick="rateIt(this,'improve_${sec.id}',${n})" style="font-size:12px">${n===1?'1 — لا تحسن':n===2?'2 — ضعيف':n===3?'3 — مقبول':n===4?'4 — جيد':'5 — ممتاز'}</button>`).join('')}
+          <div>
+            <div style="font-size:10px;font-weight:700;color:var(--text-muted);margin-bottom:7px;letter-spacing:.4px">التحسن بعد الكوتشينج</div>
+            <div style="display:flex;gap:6px;margin-bottom:8px">
+              ${[1,2,3,4,5].map(n=>{
+                const saved = ans['improve_'+sec.id]||'';
+                const labels = {1:'لا تحسن',2:'ضعيف',3:'مقبول',4:'جيد',5:'ممتاز'};
+                const colors = {1:'var(--red)',2:'var(--red)',3:'var(--amber)',4:'var(--blue)',5:'var(--green)'};
+                const isActive = saved===String(n);
+                return `<button class="r-btn${isActive?' active-'+n:''}" onclick="rateIt(this,'improve_${sec.id}',${n})"
+                  style="flex:1;font-size:11px;padding:7px 4px;text-align:center;line-height:1.3">
+                  <span style="display:block;font-size:13px;font-weight:800">${n}</span>
+                  <span style="display:block;font-size:9px;opacity:.75">${labels[n]}</span>
+                </button>`;
+              }).join('')}
+            </div>
+            <textarea class="obs-box" style="min-height:44px" oninput="saveObs('d2_improve_${sec.id}',this.value)"
+              placeholder="صف بالتحديد ما الذي تغيّر بعد الكوتشينج...">${obsData['d2_improve_'+sec.id]||''}</textarea>
+          </div>
         </div>
-        <textarea class="obs-box" style="margin-top:8px;min-height:44px" oninput="saveObs('d2_improve_${sec.id}',this.value)" placeholder="ما الذي تغيّر تحديداً بعد الكوتشينج؟"></textarea>
       </div>`;
-
-      html += `</div></div>`;
     });
 
     html += `</div></div>`;
+  } else {
+    html += `<div style="background:var(--green-bg);border:1.5px solid var(--green);border-radius:var(--radius-lg);padding:20px;margin-bottom:14px;text-align:center">
+      <div style="font-size:28px;margin-bottom:8px">🌟</div>
+      <div style="font-size:14px;font-weight:700;color:var(--green)">أداء يوم 1 ممتاز — لا فجوات حرجة</div>
+      <div style="font-size:12px;color:var(--green);margin-top:4px;opacity:.8">ركّز على التعزيز والاستمرارية وتوسيع نقاط القوة</div>
+    </div>`;
   }
 
-  // ── COACHING SESSION ──
-  html += `<div class="section" style="border-radius:12px;margin-bottom:14px;overflow:hidden">
-    <div class="sec-header" onclick="toggleSec('d2_coaching')">
+  // ══════════════════════════════════════
+  // 10% ثابت: جلسة مدير الفرع (دايماً مطلوبة)
+  // ══════════════════════════════════════
+  html += `<div class="section" style="border-radius:var(--radius-lg);margin-bottom:14px;overflow:hidden">
+    <div class="sec-header" onclick="toggleSec('d2_mgr_session')">
       <div class="sec-title">
         <div class="sec-icon">💬</div>
-        <div><div class="sec-name">جلسة الكوتشينج مع مدير الفرع</div><div class="sec-sub">Coaching Session</div></div>
+        <div><div class="sec-name">جلسة المدير — التوافق والالتزام</div><div class="sec-sub">Branch Manager Session · ثابت في كل زيارة</div></div>
       </div>
-      <i class="ti ti-chevron-down chevron" id="chev_d2_coaching" aria-hidden="true"></i>
+      <span class="chevron" id="chev_d2_mgr_session">▾</span>
     </div>
-    <div class="sec-body" id="body_d2_coaching">
+    <div class="sec-body" id="body_d2_mgr_session">
+
+      ${d1.weakSecs.length ? `<div style="background:var(--accent-dim);border-radius:var(--radius-sm);padding:10px 13px;margin-bottom:12px;font-size:12px;color:var(--navy)">
+        <strong>نقاط الأجندة المقترحة من يوم 1:</strong><br/>
+        ${d1.weakSecs.slice(0,4).map(s=>`<span style="display:inline-block;margin:3px 3px 0 0;padding:2px 8px;background:var(--red-bg);color:var(--red);border-radius:99px;font-size:10.5px;font-weight:600">${s.emoji} ${s.title} — ${s.pct}%</span>`).join('')}
+      </div>` : ''}
+
       <div class="q-item">
-        <div class="q-label">هل اطّلع مدير الفرع على نتائج يوم 1 قبل الجلسة؟</div>
-        <div class="opts" id="d2_mgr_briefed"><button class="opt-btn opt-yes" onclick="d2Sel(this,'d2_mgr_briefed','yes')">نعم</button><button class="opt-btn opt-no" onclick="d2Sel(this,'d2_mgr_briefed','no')">لا</button></div>
-      </div>
-      <div class="q-item">
-        <div class="q-label">ردّ فعله على النتائج</div>
-        <textarea class="obs-full" oninput="saveObs('d2_mgr_reaction',this.value)" placeholder="إيجابي / دفاعي / متقبل / مقاوم..."></textarea>
-      </div>
-      <div class="q-item">
-        <div class="q-label">هل حُدِّدت أسباب جذرية واضحة للمشاكل؟</div>
-        <div class="opts" id="d2_rootcause"><button class="opt-btn opt-yes" onclick="d2Sel(this,'d2_rootcause','yes')">نعم</button><button class="opt-btn opt-partial" onclick="d2Sel(this,'d2_rootcause','partial')">جزئياً</button><button class="opt-btn opt-no" onclick="d2Sel(this,'d2_rootcause','no')">لا</button></div>
-        <textarea class="obs-full" oninput="saveObs('d2_root_cause',this.value)" style="margin-top:6px" placeholder="ما الأسباب الجذرية التي اتفقتم عليها؟"></textarea>
-      </div>
-      <div class="q-item">
-        <div class="q-label">درجة جاهزية مدير الفرع للتغيير (1-5)</div>
-        <div class="rating-row" id="d2_mgr_ready">
-          ${[1,2,3,4,5].map(n=>`<button class="r-btn" onclick="rateIt(this,'d2_mgr_ready',${n})">${n}</button>`).join('')}
+        <div class="q-label">هل اطّلع المدير على نتائج يوم 1 قبل الجلسة؟</div>
+        <div class="opts" id="d2_mgr_briefed">
+          <button class="opt-btn opt-yes" onclick="d2Sel(this,'d2_mgr_briefed','yes')">نعم — بالتفصيل</button>
+          <button class="opt-btn opt-partial" onclick="d2Sel(this,'d2_mgr_briefed','partial')">جزئياً</button>
+          <button class="opt-btn opt-no" onclick="d2Sel(this,'d2_mgr_briefed','no')">لا</button>
         </div>
       </div>
-      <textarea class="obs-full" oninput="saveObs('d2_coaching_notes',this.value)" placeholder="ملاحظات عامة عن الجلسة مع المدير..."></textarea>
+      <div class="q-item">
+        <div class="q-label">ردّ فعله على النتائج وموقفه من الفجوات المكتشفة</div>
+        <textarea class="obs-full" oninput="saveObs('d2_mgr_reaction',this.value)"
+          placeholder="متقبل / دفاعي / مفاجئ / يبرر / ملتزم...">${obsData['d2_mgr_reaction']||''}</textarea>
+      </div>
+      <div class="q-item">
+        <div class="q-label">هل تم تحديد أسباب جذرية واضحة للمشاكل معاً؟</div>
+        <div class="opts" id="d2_rootcause">
+          <button class="opt-btn opt-yes" onclick="d2Sel(this,'d2_rootcause','yes')">نعم — واضحة ومتفق عليها</button>
+          <button class="opt-btn opt-partial" onclick="d2Sel(this,'d2_rootcause','partial')">جزئياً</button>
+          <button class="opt-btn opt-no" onclick="d2Sel(this,'d2_rootcause','no')">لا</button>
+        </div>
+        <textarea class="obs-full" style="margin-top:7px" oninput="saveObs('d2_root_cause',this.value)"
+          placeholder="ما الأسباب الجذرية التي توصلتم إليها معاً؟">${obsData['d2_root_cause']||''}</textarea>
+      </div>
+      <div class="q-item">
+        <div class="q-label">درجة جاهزية المدير للتغيير والتطوير (1-5)</div>
+        <div class="rating-row" id="d2_mgr_ready_row">
+          ${[1,2,3,4,5].map(n=>`<button class="r-btn${(ans['d2_mgr_ready']||'')==String(n)?' active-'+n:''}" onclick="rateIt(this,'d2_mgr_ready',${n})">${n}</button>`).join('')}
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text-muted);margin-top:3px">
+          <span>1 مقاومة كاملة</span><span>3 محايد</span><span>5 شريك في التغيير</span>
+        </div>
+      </div>
+      <div class="q-item">
+        <div class="q-label">ملاحظات الجلسة مع المدير</div>
+        <textarea class="obs-full" oninput="saveObs('d2_coaching_notes',this.value)"
+          placeholder="ما تعهد به المدير + ما سيتابعه يومياً + أي تصعيدات مطلوبة...">${obsData['d2_coaching_notes']||''}</textarea>
+      </div>
     </div>
   </div>`;
 
-  // ── ROLE PLAY & IMPROVEMENT ──
-  html += `<div class="section" style="border-radius:12px;margin-bottom:14px;overflow:hidden">
+  // ══════════════════════════════════════
+  // DYNAMIC: Role Play (بناءً على أضعف قسم)
+  // ══════════════════════════════════════
+  const weakestSec = d1.weakSecs[0];
+  const rpContext = weakestSec
+    ? `التركيز على: ${weakestSec.emoji} ${weakestSec.title} (${weakestSec.pct}%) — القسم الأضعف في يوم 1`
+    : 'تقييم عام للأداء';
+
+  html += `<div class="section" style="border-radius:var(--radius-lg);margin-bottom:14px;overflow:hidden">
     <div class="sec-header" onclick="toggleSec('d2_roleplay')">
       <div class="sec-title">
         <div class="sec-icon">🎭</div>
-        <div><div class="sec-name">Role Play وقياس التحسن الكلي</div><div class="sec-sub">Overall Improvement</div></div>
+        <div>
+          <div class="sec-name">Role Play وقياس التحسن الإجمالي</div>
+          <div class="sec-sub">${rpContext}</div>
+        </div>
       </div>
-      <i class="ti ti-chevron-down chevron" id="chev_d2_roleplay" aria-hidden="true"></i>
+      <span class="chevron" id="chev_d2_roleplay">▾</span>
     </div>
     <div class="sec-body" id="body_d2_roleplay">
+      ${weakestSec ? `<div style="background:var(--accent-dim);border-radius:var(--radius-sm);padding:10px 13px;margin-bottom:12px;font-size:12px;color:var(--navy)">
+        <strong>سيناريو مقترح:</strong> العب دور عميل يدخل الفرع ويبحث عن ${weakestSec.sec?.questions?.[0]?.text?.substring(0,60)||'منتج معين'} — قيّم كيف يتعامل الموظف مع الموقف تحديداً
+      </div>` : ''}
       <div class="q-item">
-        <div class="q-label">درجة التحسن الإجمالي الملاحظ بعد يوم التطوير (1-5)</div>
-        <div class="rating-row" id="d2_overall">
-          ${[1,2,3,4,5].map(n=>`<button class="r-btn" onclick="rateIt(this,'d2_overall',${n})">${n}</button>`).join('')}
+        <div class="q-label">درجة التحسن الإجمالي الملاحظ بعد جلسة اليوم (1-5)</div>
+        <div class="rating-row">
+          ${[1,2,3,4,5].map(n=>`<button class="r-btn${(ans['d2_overall']||'')==String(n)?' active-'+n:''}" onclick="rateIt(this,'d2_overall',${n})">${n}</button>`).join('')}
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text-muted);margin-top:3px">
+          <span>1 لا تحسن</span><span>3 مقبول</span><span>5 تحسن واضح</span>
         </div>
       </div>
       <div class="q-item">
-        <div class="q-label">ما الذي تغيّر بوضوح؟</div>
-        <textarea class="obs-full" oninput="saveObs('d2_changed',this.value)" placeholder="صف التحسن الملحوظ..."></textarea>
+        <div class="q-label">ما الذي تغيّر بشكل ملحوظ بعد اليوم؟</div>
+        <textarea class="obs-full" oninput="saveObs('d2_changed',this.value)"
+          placeholder="صف التحسن بأمثلة محددة من ما شاهدته...">${obsData['d2_changed']||''}</textarea>
       </div>
       <div class="q-item">
-        <div class="q-label">ما الذي لا يزال يحتاج وقتاً ومتابعة؟</div>
-        <textarea class="obs-full" oninput="saveObs('d2_still_needed',this.value)" placeholder="ما الذي لم يتحسن بعد؟"></textarea>
+        <div class="q-label">ما الذي لا يزال يحتاج وقتاً ومتابعة مستمرة؟</div>
+        <textarea class="obs-full" oninput="saveObs('d2_still_needed',this.value)"
+          placeholder="نقاط تحتاج مزيداً من التدريب أو الوقت...">${obsData['d2_still_needed']||''}</textarea>
       </div>
     </div>
   </div>`;
 
-  // ── FOLLOW UP PLAN ──
-  html += `<div class="section" style="border-radius:12px;margin-bottom:14px;overflow:hidden">
+  // ══════════════════════════════════════
+  // DYNAMIC: خطة المتابعة (مخصصة من يوم 1)
+  // ══════════════════════════════════════
+  // Generate follow-up suggestions based on weak dims
+  const weakDims = ['will','know','skill','env','tools'].filter(d => d1.dimScores[d]!==null && d1.dimScores[d]<60);
+  const followUpSuggestions = {
+    will:  'متابعة يومية من مدير الفرع + مراجعة KPIs أسبوعية',
+    know:  'اختبار معرفي سريع أسبوعياً + تحديث محتوى منصة تمكين',
+    skill: 'Role Play أسبوعي لمدة شهر + ملاحظة ميدانية مباشرة',
+    env:   'مراجعة ميدانية للبيئة التشغيلية + تقرير للإدارة',
+    tools: 'جلسة تدريبية على الأنظمة + Quick Reference Card'
+  };
+
+  html += `<div class="section" style="border-radius:var(--radius-lg);margin-bottom:14px;overflow:hidden">
     <div class="sec-header" onclick="toggleSec('d2_followup')">
       <div class="sec-title">
         <div class="sec-icon">📅</div>
-        <div><div class="sec-name">خطة المتابعة</div><div class="sec-sub">Follow-up Plan</div></div>
+        <div><div class="sec-name">خطة المتابعة والإجراءات الفورية</div><div class="sec-sub">مبنية على نتائج يوم 1 + يوم 2</div></div>
       </div>
-      <i class="ti ti-chevron-down chevron" id="chev_d2_followup" aria-hidden="true"></i>
+      <span class="chevron" id="chev_d2_followup">▾</span>
     </div>
     <div class="sec-body" id="body_d2_followup">
+
+      ${weakDims.length ? `<div style="background:var(--accent-dim);border-radius:var(--radius-sm);padding:10px 13px;margin-bottom:12px">
+        <div style="font-size:10px;font-weight:700;color:var(--blue);margin-bottom:6px;letter-spacing:.4px">إجراءات متابعة مقترحة من يوم 1:</div>
+        ${weakDims.map(d=>`<div style="font-size:11.5px;color:var(--navy);margin-bottom:4px">
+          <span style="font-weight:700">${d==='will'?'🎯':d==='know'?'📚':d==='skill'?'💪':d==='env'?'🏪':'🛠️'} ${d1.dimScores[d]}%</span>
+          → ${followUpSuggestions[d]}
+        </div>`).join('')}
+      </div>` : ''}
+
       <div class="q-item">
-        <div class="q-label">هل تم شرح أهمية NPS/CSAT Survey للفريق؟</div>
-        <div class="opts" id="d2_csat_done"><button class="opt-btn opt-yes" onclick="d2Sel(this,'d2_csat_done','yes')">نعم</button><button class="opt-btn opt-no" onclick="d2Sel(this,'d2_csat_done','no')">لا</button></div>
+        <div class="q-label">هل تم شرح أهمية تقييم العميل (NPS/CSAT) للفريق؟</div>
+        <div class="opts" id="d2_csat_done">
+          <button class="opt-btn opt-yes" onclick="d2Sel(this,'d2_csat_done','yes')">نعم</button>
+          <button class="opt-btn opt-no" onclick="d2Sel(this,'d2_csat_done','no')">لا</button>
+        </div>
+      </div>
+
+      ${d1.weakSecs.some(s=>s.id==='s6') ? `<div class="q-item">
+        <div class="q-label">هل تم تصحيح خريطة العرض (VM) أو كروت الأسعار؟ <span style="color:var(--red);font-size:10px;font-weight:700">مطلوب — يوم 1 أظهر ضعف في معايير الفرع</span></div>
+        <div class="opts" id="d2_vm_done">
+          <button class="opt-btn opt-yes" onclick="d2Sel(this,'d2_vm_done','yes')">تم التصحيح كاملاً</button>
+          <button class="opt-btn opt-partial" onclick="d2Sel(this,'d2_vm_done','partial')">جزئياً</button>
+          <button class="opt-btn opt-no" onclick="d2Sel(this,'d2_vm_done','no')">لم يتم</button>
+        </div>
+      </div>` : ''}
+
+      <div class="q-item">
+        <div class="q-label">Quick Wins — ما يمكن تطبيقه خلال أسبوع</div>
+        <textarea class="obs-full" oninput="saveObs('d2_quickwins',this.value)"
+          placeholder="${weakDims.includes('will')?'سكريبت الترحيب · ':''} ${weakDims.includes('env')?'تصحيح VM · ':''}${weakDims.includes('know')?'كرت مرجعي للمنتجات · ':''} أضف ما تراه...">${obsData['d2_quickwins']||''}</textarea>
       </div>
       <div class="q-item">
-        <div class="q-label">هل تم تصحيح خريطة العرض (VM) أو كروت الأسعار؟</div>
-        <div class="opts" id="d2_vm_done"><button class="opt-btn opt-yes" onclick="d2Sel(this,'d2_vm_done','yes')">نعم</button><button class="opt-btn opt-partial" onclick="d2Sel(this,'d2_vm_done','partial')">جزئياً</button><button class="opt-btn opt-no" onclick="d2Sel(this,'d2_vm_done','no')">لا</button></div>
+        <div class="q-label">احتياجات تدريبية جديدة اكتُشفت (لمنصة تمكين)</div>
+        <textarea class="obs-full" oninput="saveObs('d2_newneeds',this.value)"
+          placeholder="محتوى يحتاج إنشاء أو تحديث...">${obsData['d2_newneeds']||''}</textarea>
       </div>
-      <div class="q-item"><div class="q-label">Quick Wins قابلة للتطبيق خلال أسبوع</div>
-        <textarea class="obs-full" oninput="saveObs('d2_quickwins',this.value)" placeholder="سكريبت / VM / تقسيط / بروتوكول..."></textarea>
+      <div class="q-item">
+        <div class="q-label">توصية لمدير المنطقة</div>
+        <textarea class="obs-full" oninput="saveObs('d2_areamgr',this.value)"
+          placeholder="${d1.weakSecs.length && d1.weakSecs[0].pct<45?'هذا الفرع يحتاج تدخلاً عاجلاً — ':''}ما الدعم المطلوب من مدير المنطقة؟">${obsData['d2_areamgr']||''}</textarea>
       </div>
-      <div class="q-item"><div class="q-label">احتياجات تدريبية جديدة اكتُشفت (لمنصة تمكين)</div>
-        <textarea class="obs-full" oninput="saveObs('d2_newneeds',this.value)" placeholder="محتوى يحتاج إضافة..."></textarea>
-      </div>
-      <div class="q-item"><div class="q-label">توصية لمدير المنطقة</div>
-        <textarea class="obs-full" oninput="saveObs('d2_areamgr',this.value)" placeholder="ما الدعم المطلوب منه؟"></textarea>
-      </div>
-      <div class="q-item"><div class="q-label">موعد الزيارة المتابعة المقترح</div>
-        <input type="date" style="font-size:13px;padding:6px 10px;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface-1);color:var(--text-primary);width:100%"/>
+      <div class="q-item">
+        <div class="q-label">موعد الزيارة المتابعة المقترح</div>
+        <input type="date" id="d2_followup_date" 
+          value="${obsData['d2_followup_date'] || new Date(Date.now()+(d1.total<60?14:30)*86400000).toISOString().split('T')[0]}"
+          oninput="saveObs('d2_followup_date',this.value)"
+          style="font-size:13px;padding:8px 11px;border:1.5px solid var(--border);border-radius:var(--radius-sm);background:var(--surface);color:var(--text);width:100%;outline:none"/>
+        <div style="font-size:10.5px;color:var(--text-muted);margin-top:4px">
+          ${d1.total<45?'⚠️ مستوى عاجل — الزيارة المقترحة خلال أسبوعين':d1.total<65?'الزيارة المقترحة خلال أسبوعين-شهر':'الزيارة المقترحة خلال شهر'}
+        </div>
       </div>
     </div>
   </div>`;
@@ -3384,6 +3927,7 @@ function dashApply() {
   const grade     = (document.getElementById('df-grade')||{}).value||'';
   const from      = (document.getElementById('df-from')||{}).value||'';
   const to        = (document.getElementById('df-to')||{}).value||'';
+  const search    = ((document.getElementById('df-search')||{}).value||'').toLowerCase().trim();
 
   filteredVisits = allVisits.filter(v => {
     if (region    && v.region    !== region)    return false;
@@ -3393,6 +3937,10 @@ function dashApply() {
     if (grade     && v.grade     !== grade)     return false;
     if (from      && v.date < from)             return false;
     if (to        && v.date > to)               return false;
+    if (search) {
+      const haystack = [v.branch,v.mgr,v.area,v.region,v.inspector,v.date,String(v.score||'')].join(' ').toLowerCase();
+      if (!haystack.includes(search)) return false;
+    }
     return true;
   });
 
@@ -3403,10 +3951,9 @@ function dashApply() {
 }
 
 function dashClear() {
-  ['df-region','df-area','df-branch','df-inspector','df-grade','df-from','df-to'].forEach(id=>{
+  ['df-region','df-area','df-branch','df-inspector','df-grade','df-from','df-to','df-search'].forEach(id=>{
     const el=document.getElementById(id); if(el) el.value='';
   });
-  // Reset all selects to full list
   dashPopulateFilters();
   dashApply();
 }
